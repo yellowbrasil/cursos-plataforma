@@ -18,9 +18,7 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('usuario');
-    router.push('/login');
+    router.push('/logout');
   };
 
   return (
