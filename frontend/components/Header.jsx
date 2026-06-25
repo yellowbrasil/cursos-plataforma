@@ -27,7 +27,7 @@ export default function Header() {
     <header className="header">
       <div className="header-content">
         <Link href="/" className="logo">
-          📚 Cursos
+          <span className="pulse"></span>Cursos
         </Link>
 
         <nav className="nav-links">

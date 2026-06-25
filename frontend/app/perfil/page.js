@@ -75,7 +75,7 @@ export default function PerfilPage() {
       <Header />
       <div className="container" style={{ marginTop: '40px', maxWidth: '500px' }}>
         <div className="card">
-          <h1 style={{ marginBottom: '30px', color: 'var(--primary)' }}>Meu Perfil</h1>
+          <h1 style={{ marginBottom: '30px', color: 'var(--primary)' }}><span className="pulse" style={{ marginRight: '12px' }}></span>Meu Perfil</h1>
 
           <div style={{ marginBottom: '30px' }}>
             <h3>Informações Pessoais</h3>

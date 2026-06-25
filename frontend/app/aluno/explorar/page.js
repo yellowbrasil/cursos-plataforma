@@ -79,7 +79,7 @@ export default function ExplorarPage() {
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
-        <h1>Explorar Trilhas</h1>
+        <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Explorar Trilhas</h1>
 
         {trilhasDisponiveis.length === 0 ? (
           <div style={{ marginTop: '30px', color: 'var(--text-muted)' }}>

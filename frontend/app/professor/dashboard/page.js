@@ -96,7 +96,7 @@ export default function ProfessorDashboardPage() {
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-          <h1>Minhas Trilhas</h1>
+          <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas</h1>
           <button onClick={() => setShowForm(!showForm)} className="btn-primary">
             {showForm ? 'Cancelar' : '+ Nova Trilha'}
           </button>

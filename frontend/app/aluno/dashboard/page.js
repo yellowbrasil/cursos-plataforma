@@ -50,7 +50,7 @@ export default function AlunoDashboardPage() {
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
-        <h1>Minhas Trilhas de Aprendizado</h1>
+        <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
 
         {trilhas.length === 0 ? (
           <p style={{ marginTop: '20px', color: '#ccc' }}>

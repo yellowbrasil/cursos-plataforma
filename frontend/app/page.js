@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,15 +25,16 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
-        }}
-      >
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+          }}
+        >
         <div
           style={{
             textAlign: 'center',
@@ -40,29 +42,42 @@ export default function HomePage() {
             padding: '40px',
           }}
         >
+          <div style={{ marginBottom: '30px' }}>
+            <div className="pulse" style={{
+              width: '60px',
+              height: '60px',
+              margin: '0 auto 20px',
+              animation: 'pulse-animation 2s infinite'
+            }}></div>
+          </div>
+
           <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>
-            📚 Plataforma de Cursos
+            Plataforma de Cursos
           </h1>
+
           <p
             style={{
-              fontSize: '20px',
+              fontSize: '18px',
               color: 'var(--text-muted)',
-              marginBottom: '30px',
+              marginBottom: '15px',
+              lineHeight: '1.6'
             }}
           >
-            Aprenda no seu próprio ritmo com cursos estruturados em trilhas,
-            módulos e aulas.
+            Bem-vindo ao seu espaço de aprendizado. Aprenda no seu próprio ritmo com cursos estruturados em trilhas, módulos e aulas.
           </p>
+
           <button
             onClick={() => {
               window.location.href = '/login';
             }}
             className="btn-primary"
-            style={{ fontSize: '16px', padding: '15px 40px' }}
+            style={{ fontSize: '16px', padding: '15px 40px', marginTop: '20px' }}
           >
             Começar Agora
           </button>
         </div>
+        </div>
+        <Footer />
       </div>
     </>
   );

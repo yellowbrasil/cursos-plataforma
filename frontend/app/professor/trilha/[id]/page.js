@@ -82,7 +82,7 @@ export default function GerenciarTrilhaPage() {
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
-        <h1 style={{ marginBottom: '30px' }}>Gerenciar Trilha</h1>
+        <h1 style={{ marginBottom: '30px' }}><span className="pulse" style={{ marginRight: '12px' }}></span>Gerenciar Trilha</h1>
 
         <div style={{ marginBottom: '30px' }}>
           <button

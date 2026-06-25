@@ -166,7 +166,7 @@ export default function TrilhaPage() {
                             className="btn-secondary"
                             style={{ width: '100%', textAlign: 'left' }}
                           >
-                            📖 {licao.nome}
+                            {licao.nome}
                           </button>
                         </li>
                       ))}
@@ -222,7 +222,7 @@ function PlaylistLicoes({ modulos, licoesMap, licaoSelecionada, onLicaoClique })
                 fontWeight: licao.id === licaoSelecionada.id ? '600' : '400',
               }}
             >
-              📖 {licao.nome}
+              {licao.nome}
             </button>
           </li>
         ))}
