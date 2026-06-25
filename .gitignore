@@ -13,3 +13,5 @@ build/
 *~
 .vscode/
 .idea/
+uploads/
+backend/uploads/

@@ -1,6 +1,7 @@
 import express from 'express';
 import { pool } from '../server.js';
 import { verificarJWT, verificarProfessor } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -21,15 +22,20 @@ router.get('/licao/:licao_id', verificarJWT, async (req, res) => {
   }
 });
 
-// Adicionar material (professor)
-// Nota: Upload real com multer/S3 seria implementado em produção
-router.post('/', verificarJWT, verificarProfessor, async (req, res) => {
+// Adicionar material (professor) com upload
+router.post('/', verificarJWT, verificarProfessor, upload.single('arquivo'), async (req, res) => {
   try {
-    const { licao_id, nome, tipo, arquivo_url, tamanho } = req.body;
+    const { licao_id, nome } = req.body;
 
-    if (!licao_id || !nome || !arquivo_url) {
+    if (!licao_id || !nome || !req.file) {
       return res.status(400).json({ erro: 'Lição, nome e arquivo são obrigatórios' });
     }
+
+    const arquivo_url = `/uploads/${req.file.filename}`;
+    const tipo = req.file.mimetype.includes('sheet') || req.file.mimetype.includes('excel') ? 'planilha' :
+                  req.file.mimetype.includes('pdf') ? 'pdf' :
+                  req.file.mimetype.includes('word') ? 'docs' : 'outro';
+    const tamanho = req.file.size;
 
     // Verificar se professor é dono
     const licao = await pool.query(

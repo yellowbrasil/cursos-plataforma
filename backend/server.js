@@ -9,6 +9,7 @@ import licoesRoutes from './routes/licoes.js';
 import materiaisRoutes from './routes/materiais.js';
 import progressoRoutes from './routes/progresso.js';
 import inscricoesRoutes from './routes/inscricoes.js';
+import reordenarRoutes from './routes/reordenar.js';
 
 dotenv.config();
 
@@ -44,6 +45,10 @@ app.use('/api/licoes', licoesRoutes);
 app.use('/api/materiais', materiaisRoutes);
 app.use('/api/progresso', progressoRoutes);
 app.use('/api/inscricoes', inscricoesRoutes);
+app.use('/api/reordenar', reordenarRoutes);
+
+// Servir arquivos de upload
+app.use('/uploads', express.static('uploads'));
 
 // Error handling
 app.use((err, req, res, next) => {
