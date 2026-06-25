@@ -7,8 +7,8 @@ import axios from 'axios';
 import './trilha.css';
 
 export default function TrilhaPage() {
-  const [trilha, setTrilha] = useState(null);
   const [modulos, setModulos] = useState([]);
+  const [licoesMap, setLicoesMap] = useState({});
   const [licaoSelecionada, setLicaoSelecionada] = useState(null);
   const [materiais, setMateriais] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,12 +25,23 @@ export default function TrilhaPage() {
 
     const fetchTrilha = async () => {
       try {
-        // Buscar módulos
         const modulosRes = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/api/modulos/trilha/${params.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
         setModulos(modulosRes.data);
+
+        // Buscar lições de cada módulo
+        const mapaLicoes = {};
+        for (const modulo of modulosRes.data) {
+          const licoesRes = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/licoes/modulo/${modulo.id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          mapaLicoes[modulo.id] = licoesRes.data;
+        }
+        setLicoesMap(mapaLicoes);
         setLoading(false);
       } catch (erro) {
         console.error('Erro:', erro);
@@ -144,11 +155,23 @@ export default function TrilhaPage() {
                   <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
                     {modulo.descricao}
                   </p>
-                  <ModuloLicoes
-                    modulo_id={modulo.id}
-                    token={token}
-                    onLicaoClique={handleLicaoClique}
-                  />
+                  {(licoesMap[modulo.id] || []).length === 0 ? (
+                    <p style={{ color: 'var(--text-muted)' }}>Nenhuma lição neste módulo</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+                      {(licoesMap[modulo.id] || []).map((licao) => (
+                        <li key={licao.id} style={{ marginBottom: '8px' }}>
+                          <button
+                            onClick={() => handleLicaoClique(licao)}
+                            className="btn-secondary"
+                            style={{ width: '100%', textAlign: 'left' }}
+                          >
+                            📖 {licao.nome}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))}
             </div>
@@ -158,10 +181,10 @@ export default function TrilhaPage() {
         {licaoSelecionada && (
           <aside className="licoes-sidebar">
             <h3>Aulas do Módulo</h3>
-            <ModulosPlaylist
+            <PlaylistLicoes
               modulos={modulos}
+              licoesMap={licoesMap}
               licaoSelecionada={licaoSelecionada}
-              token={token}
               onLicaoClique={handleLicaoClique}
             />
           </aside>
@@ -171,57 +194,39 @@ export default function TrilhaPage() {
   );
 }
 
-function ModuloLicoes({ modulo_id, token, onLicaoClique }) {
-  const [licoes, setLicoes] = useState([]);
-
-  useEffect(() => {
-    const fetchLicoes = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/licoes/modulo/${modulo_id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setLicoes(response.data);
-      } catch (erro) {
-        console.error('Erro:', erro);
-      }
-    };
-
-    fetchLicoes();
-  }, [modulo_id, token]);
-
-  return (
-    <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
-      {licoes.map((licao) => (
-        <li key={licao.id} style={{ marginBottom: '8px' }}>
-          <button
-            onClick={() => onLicaoClique(licao)}
-            className="btn-secondary"
-            style={{ width: '100%', textAlign: 'left' }}
-          >
-            📖 {licao.nome}
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function ModulosPlaylist({ modulos, licaoSelecionada, token, onLicaoClique }) {
-  const moduloAtual = modulos.find((m) =>
-    m.licoes?.some((l) => l.id === licaoSelecionada.id)
-  );
+function PlaylistLicoes({ modulos, licoesMap, licaoSelecionada, onLicaoClique }) {
+  // Encontrar módulo atual
+  const moduloAtual = modulos.find((m) => {
+    const licoes = licoesMap[m.id] || [];
+    return licoes.some((l) => l.id === licaoSelecionada.id);
+  });
 
   if (!moduloAtual) return null;
 
+  const licoes = licoesMap[moduloAtual.id] || [];
+
   return (
     <div>
-      <h4 style={{ marginBottom: '15px' }}>{moduloAtual.nome}</h4>
-      <ModuloLicoes
-        modulo_id={moduloAtual.id}
-        token={token}
-        onLicaoClique={onLicaoClique}
-      />
+      <h4 style={{ marginBottom: '15px', color: 'var(--primary)' }}>{moduloAtual.nome}</h4>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {licoes.map((licao) => (
+          <li key={licao.id} style={{ marginBottom: '8px' }}>
+            <button
+              onClick={() => onLicaoClique(licao)}
+              className={licao.id === licaoSelecionada.id ? 'btn-primary' : 'btn-secondary'}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                fontSize: '13px',
+                padding: '8px 12px',
+                fontWeight: licao.id === licaoSelecionada.id ? '600' : '400',
+              }}
+            >
+              📖 {licao.nome}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

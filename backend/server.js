@@ -8,6 +8,7 @@ import modulosRoutes from './routes/modulos.js';
 import licoesRoutes from './routes/licoes.js';
 import materiaisRoutes from './routes/materiais.js';
 import progressoRoutes from './routes/progresso.js';
+import inscricoesRoutes from './routes/inscricoes.js';
 
 dotenv.config();
 
@@ -20,11 +21,14 @@ app.use(cors());
 
 // Database Pool
 export const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'cursos_db',
-  password: process.env.DB_PASSWORD || 'postgres',
-  port: process.env.DB_PORT || 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: parseInt(process.env.DB_PORT),
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 // Health check
@@ -39,6 +43,7 @@ app.use('/api/modulos', modulosRoutes);
 app.use('/api/licoes', licoesRoutes);
 app.use('/api/materiais', materiaisRoutes);
 app.use('/api/progresso', progressoRoutes);
+app.use('/api/inscricoes', inscricoesRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
