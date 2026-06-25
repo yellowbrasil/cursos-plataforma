@@ -6,6 +6,32 @@ import Header from '@/components/Header';
 import axios from 'axios';
 import './trilha.css';
 
+// Extrair ID do YouTube de diferentes formatos
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+
+  let videoId = null;
+
+  // youtu.be/VIDEO_ID
+  if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+  }
+  // youtube.com/watch?v=VIDEO_ID
+  else if (url.includes('watch?v=')) {
+    videoId = url.split('watch?v=')[1]?.split('&')[0];
+  }
+  // youtube.com/live/VIDEO_ID
+  else if (url.includes('/live/')) {
+    videoId = url.split('/live/')[1]?.split('?')[0];
+  }
+  // youtube.com/embed/VIDEO_ID
+  else if (url.includes('/embed/')) {
+    videoId = url.split('/embed/')[1]?.split('?')[0];
+  }
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+}
+
 export default function TrilhaPage() {
   const [modulos, setModulos] = useState([]);
   const [licoesMap, setLicoesMap] = useState({});
@@ -108,11 +134,11 @@ export default function TrilhaPage() {
               <h2 style={{ marginBottom: '20px' }}>{licaoSelecionada.nome}</h2>
 
               <div className="video-player">
-                {licaoSelecionada.video_url.includes('youtu') ? (
+                {licaoSelecionada.video_url && getYouTubeEmbedUrl(licaoSelecionada.video_url) ? (
                   <iframe
                     width="100%"
                     height="500"
-                    src={licaoSelecionada.video_url.replace('watch?v=', 'embed/')}
+                    src={getYouTubeEmbedUrl(licaoSelecionada.video_url)}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
