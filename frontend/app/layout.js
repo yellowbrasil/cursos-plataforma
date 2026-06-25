@@ -1,4 +1,5 @@
 import './globals.css';
+import TopBar from '@/components/TopBar';
 
 export const metadata = {
   title: 'Plataforma de Cursos',
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <TopBar />
+        <div style={{ paddingTop: '4px' }}>{children}</div>
+      </body>
     </html>
   );
 }
