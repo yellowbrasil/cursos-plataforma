@@ -5,7 +5,7 @@ import { pool } from '../server.js';
 import { verificarJWT } from '../middleware/auth.js';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'seu_segredo_jwt';
+const JWT_SECRET = process.env.JWT_SECRET || 'desenvolvimento_seguro_2026_fabio_schneider_cursos';
 
 // Login
 router.post('/login', async (req, res) => {

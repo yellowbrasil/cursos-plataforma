@@ -8,7 +8,7 @@ export const verificarJWT = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'seu_segredo_jwt');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'desenvolvimento_seguro_2026_fabio_schneider_cursos');
     req.usuario_id = decoded.usuario_id;
     req.tipo_usuario = decoded.tipo;
     next();
