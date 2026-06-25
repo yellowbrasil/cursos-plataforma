@@ -16,7 +16,7 @@ router.get('/', verificarJWT, async (req, res) => {
       query = `
         SELECT t.* FROM trilhas t
         INNER JOIN inscricoes i ON t.id = i.trilha_id
-        WHERE i.aluno_id = $1
+        WHERE i.aluno_id = $1 AND i.bloqueado = FALSE
         ORDER BY t.ordem ASC
       `;
       params = [req.usuario_id];
