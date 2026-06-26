@@ -19,23 +19,35 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log('Enviando login para:', `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`);
+      console.log('Email:', email);
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         { email, senha }
       );
+
+      console.log('Resposta recebida:', response.data);
 
       const { token, usuario } = response.data;
 
       localStorage.setItem('token', token);
       localStorage.setItem('usuario', JSON.stringify(usuario));
 
-      if (usuario.tipo === 'professor') {
+      console.log('Token e usuário salvos. Redirecionando...');
+
+      if (usuario.tipo === 'professor' || usuario.tipo === 'admin') {
         router.push('/professor/dashboard');
       } else if (usuario.tipo === 'aluno') {
         router.push('/aluno/dashboard');
+      } else {
+        setErro('Tipo de usuário desconhecido: ' + usuario.tipo);
       }
     } catch (erro) {
-      setErro(erro.response?.data?.erro || 'Erro ao fazer login');
+      console.error('Erro no login:', erro);
+      console.error('Status:', erro.response?.status);
+      console.error('Dados:', erro.response?.data);
+      setErro(erro.response?.data?.erro || 'Erro ao fazer login: ' + erro.message);
     } finally {
       setLoading(false);
     }
