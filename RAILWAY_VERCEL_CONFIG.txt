@@ -1,0 +1,101 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   🚀 DEPLOY AUTOMÁTICO - COPIAR E COLAR 🚀                ║
+║                        AI PRO ACADEMY - 2026                               ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✅ SUPABASE: JÁ CONFIGURADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Projeto: ai-pro-academy
+  Status: ✅ Schema importado
+  Banco: cursos_db
+
+═════════════════════════════════════════════════════════════════════════════
+
+🚀 RAILWAY (Backend) - COPIAR ESTAS VARIÁVEIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+URL: https://railway.app
+
+NOVO PROJETO:
+  1. Click: "Create New Project"
+  2. Select: "GitHub Repo"
+  3. Conectar: "cursos-plataforma"
+
+VARIÁVEIS A CONFIGURAR (copie e cole no Railway):
+
+DB_HOST=db.tkycshgylushbmxmyvul.supabase.co
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=F024151f@#$
+DB_NAME=postgres
+JWT_SECRET=fa5ac88a0323fd113316beb926ff10aac34aea3f5103261d78b18304bbf5f9e7
+NODE_ENV=production
+PORT=3001
+FRONTEND_URL=https://seu-projeto.vercel.app
+
+DEPLOY:
+  Click: "Deploy"
+  Aguarde: 2-5 minutos
+  Copie: A URL que aparecer (ex: seu-projeto-prod.up.railway.app)
+
+═════════════════════════════════════════════════════════════════════════════
+
+🎨 VERCEL (Frontend) - COPIAR ESTA VARIÁVEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+URL: https://vercel.com
+
+NOVO PROJETO:
+  1. Click: "Add New" → "Project"
+  2. Conectar: "cursos-plataforma"
+
+VARIÁVEL A CONFIGURAR (substitua a URL do Railway que você copiou):
+
+NEXT_PUBLIC_API_URL=https://[COLE-A-URL-DO-RAILWAY-AQUI]
+
+Exemplo:
+  NEXT_PUBLIC_API_URL=https://seu-projeto-prod.up.railway.app
+
+DEPLOY:
+  Click: "Deploy"
+  Aguarde: 2-3 minutos
+  Acesse: https://seu-projeto.vercel.app
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ TESTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Acesse: https://seu-projeto.vercel.app
+2. Login:
+   Email: yellowbrasildigital@gmail.com
+   Senha: senha123
+3. Testes:
+   ☐ Dashboard carrega?
+   ☐ Criar trilha funciona?
+   ☐ Upload de imagem funciona?
+   ☐ Banner e avisos aparecem?
+   ☐ Alunos conseguem acessar?
+
+═════════════════════════════════════════════════════════════════════════════
+
+⏱️  TEMPO ESTIMADO: 15-20 MINUTOS TOTAL
+
+    Railway Deploy:  5-10 min
+    Vercel Deploy:   2-5 min
+    Testes:          3-5 min
+
+═════════════════════════════════════════════════════════════════════════════
+
+📞 SE ALGO DER ERRADO
+
+1. Verifique DEPLOY.md para instruções detalhadas
+2. Veja logs do Railway e Vercel
+3. Valide que NEXT_PUBLIC_API_URL não tem barra no final (/)
+4. Certifique-se que JWT_SECRET foi configurado
+
+═════════════════════════════════════════════════════════════════════════════
+
+🎉 SUCESSO = Seu sistema AI PRO ACADEMY online!
+
