@@ -52,7 +52,7 @@ export default function HomePage() {
           </div>
 
           <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>
-            Plataforma de Cursos
+            AI PRO ACADEMY
           </h1>
 
           <p

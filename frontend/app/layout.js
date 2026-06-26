@@ -2,8 +2,8 @@ import './globals.css';
 import TopBar from '@/components/TopBar';
 
 export const metadata = {
-  title: 'Plataforma de Cursos',
-  description: 'Plataforma de cursos online',
+  title: 'AI PRO ACADEMY',
+  description: 'AI PRO ACADEMY - Plataforma de Cursos Online',
 };
 
 export default function RootLayout({ children }) {

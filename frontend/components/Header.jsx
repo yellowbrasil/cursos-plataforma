@@ -25,7 +25,7 @@ export default function Header() {
     <header className="header">
       <div className="header-content">
         <Link href="/" className="logo">
-          <span className="pulse"></span>Cursos
+          <span className="pulse"></span>AI PRO ACADEMY
         </Link>
 
         <nav className="nav-links">
