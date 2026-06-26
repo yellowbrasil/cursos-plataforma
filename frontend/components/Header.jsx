@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function Header() {
   const [usuario, setUsuario] = useState(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const isProfessor = pathname.startsWith('/professor');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -34,20 +36,20 @@ export default function Header() {
               <span className="text-muted">
                 {usuario.nome}
               </span>
-              {usuario.tipo === 'professor' && (
+              {!isProfessor && usuario.tipo === 'professor' && (
                 <>
                   <Link href="/professor/dashboard">Dashboard</Link>
                   <Link href="/professor/alunos">Alunos</Link>
                   <Link href="/professor/configuracoes">Configurações</Link>
                 </>
               )}
-              {usuario.tipo === 'aluno' && (
+              {!isProfessor && usuario.tipo === 'aluno' && (
                 <>
                   <Link href="/aluno/dashboard">Minhas Trilhas</Link>
                   <Link href="/aluno/explorar">Explorar</Link>
                 </>
               )}
-              <Link href="/perfil">Perfil</Link>
+              {!isProfessor && <Link href="/perfil">Perfil</Link>}
               <button onClick={handleLogout} className="btn-secondary">
                 Sair
               </button>
