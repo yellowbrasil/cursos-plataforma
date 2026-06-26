@@ -12,6 +12,7 @@ export default function ProfessorDashboardPage() {
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [sinopse, setSinopse] = useState('');
+  const [linkAsaas, setLinkAsaas] = useState('');
   const [imagem, setImagem] = useState(null);
   const [previewImagem, setPreviewImagem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +58,7 @@ export default function ProfessorDashboardPage() {
       formData.append('nome', nome);
       formData.append('descricao', descricao);
       formData.append('sinopse', sinopse);
+      formData.append('link_asaas', linkAsaas);
       if (imagem) {
         formData.append('imagem', imagem);
       }
@@ -76,6 +78,7 @@ export default function ProfessorDashboardPage() {
       setNome('');
       setDescricao('');
       setSinopse('');
+      setLinkAsaas('');
       setImagem(null);
       setPreviewImagem(null);
       setShowForm(false);
@@ -160,6 +163,17 @@ export default function ProfessorDashboardPage() {
                 <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
                   {sinopse.length}/200 caracteres
                 </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="linkAsaas">Link Asaas (Compra/Autorização)</label>
+                <input
+                  id="linkAsaas"
+                  type="url"
+                  value={linkAsaas}
+                  onChange={(e) => setLinkAsaas(e.target.value)}
+                  placeholder="https://asaas.com/..."
+                />
               </div>
 
               <div className="form-group">
