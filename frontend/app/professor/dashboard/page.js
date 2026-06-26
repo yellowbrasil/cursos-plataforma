@@ -13,7 +13,7 @@ export default function ProfessorDashboardPage() {
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [sinopse, setSinopse] = useState('');
-  const [linkAsaas, setLinkAsaas] = useState('');
+  const [linkAsaasTrilha, setLinkAsaasTrilha] = useState('');
   const [imagem, setImagem] = useState(null);
   const [previewImagem, setPreviewImagem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +59,7 @@ export default function ProfessorDashboardPage() {
       formData.append('nome', nome);
       formData.append('descricao', descricao);
       formData.append('sinopse', sinopse);
-      formData.append('link_asaas', linkAsaas);
+      formData.append('link_asaas', linkAsaasTrilha);
       if (imagem) {
         formData.append('imagem', imagem);
       }
@@ -79,7 +79,7 @@ export default function ProfessorDashboardPage() {
       setNome('');
       setDescricao('');
       setSinopse('');
-      setLinkAsaas('');
+      setLinkAsaasTrilha('');
       setImagem(null);
       setPreviewImagem(null);
       setShowForm(false);
@@ -168,13 +168,13 @@ export default function ProfessorDashboardPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="linkAsaas">Link Asaas (Compra/Autorização)</label>
+                <label htmlFor="linkAsaasTrilha">Link Asaas (Compra/Autorização) - Opcional</label>
                 <input
-                  id="linkAsaas"
+                  id="linkAsaasTrilha"
                   type="url"
-                  value={linkAsaas}
-                  onChange={(e) => setLinkAsaas(e.target.value)}
-                  placeholder="https://asaas.com/..."
+                  value={linkAsaasTrilha}
+                  onChange={(e) => setLinkAsaasTrilha(e.target.value)}
+                  placeholder="https://asaas.com/... (deixe em branco se não tiver)"
                 />
               </div>
 
