@@ -11,7 +11,6 @@ export default function ProfessorDashboardPage() {
   const [trilhas, setTrilhas] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [nome, setNome] = useState('');
-  const [descricao, setDescricao] = useState('');
   const [sinopse, setSinopse] = useState('');
   const [linkAsaasTrilha, setLinkAsaasTrilha] = useState('');
   const [imagem, setImagem] = useState(null);
@@ -57,7 +56,6 @@ export default function ProfessorDashboardPage() {
     try {
       const formData = new FormData();
       formData.append('nome', nome);
-      formData.append('descricao', descricao);
       formData.append('sinopse', sinopse);
       formData.append('link_asaas', linkAsaasTrilha);
       if (imagem) {
@@ -77,7 +75,6 @@ export default function ProfessorDashboardPage() {
 
       setTrilhas([...trilhas, response.data]);
       setNome('');
-      setDescricao('');
       setSinopse('');
       setLinkAsaasTrilha('');
       setImagem(null);
@@ -138,17 +135,6 @@ export default function ProfessorDashboardPage() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="ex: Marketing Digital"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="descricao">Descrição</label>
-                <textarea
-                  id="descricao"
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  placeholder="Descreva o conteúdo da trilha..."
-                  rows="4"
                 />
               </div>
 
@@ -256,13 +242,10 @@ export default function ProfessorDashboardPage() {
                   {trilha.nome}
                 </h3>
                 {trilha.sinopse && (
-                  <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '10px', fontStyle: 'italic' }}>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '13px' }}>
                     {trilha.sinopse}
                   </p>
                 )}
-                <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '12px' }}>
-                  {trilha.descricao}
-                </p>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
                     onClick={() => router.push(`/professor/trilha/${trilha.id}`)}

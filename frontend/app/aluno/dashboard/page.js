@@ -192,13 +192,10 @@ export default function AlunoDashboardPage() {
                       {trilha.nome}
                     </h3>
                     {trilha.sinopse && (
-                      <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '10px', fontStyle: 'italic' }}>
+                      <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '13px' }}>
                         {trilha.sinopse}
                       </p>
                     )}
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '12px' }}>
-                      {trilha.descricao}
-                    </p>
                     {trilha.link_asaas ? (
                       <a
                         href={trilha.link_asaas}
