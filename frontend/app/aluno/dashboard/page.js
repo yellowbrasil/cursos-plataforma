@@ -39,12 +39,17 @@ export default function AlunoDashboardPage() {
 
   const fetchConfiguracoes = async () => {
     try {
+      console.log('Buscando configurações de:', `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`
       );
+      console.log('Configurações recebidas:', response.data);
       setConfig(response.data);
+      if (response.data.banner_url) {
+        console.log('Banner URL encontrada:', response.data.banner_url);
+      }
     } catch (erro) {
-      console.error('Erro:', erro);
+      console.error('Erro ao buscar configurações:', erro);
     }
   };
 
@@ -63,7 +68,7 @@ export default function AlunoDashboardPage() {
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
-        {config.banner_url && (
+        {config.banner_url ? (
           <div style={{ marginBottom: '40px' }}>
             <img
               src={config.banner_url}
@@ -76,9 +81,17 @@ export default function AlunoDashboardPage() {
               }}
               onError={(e) => {
                 console.error('Erro ao carregar banner:', config.banner_url);
+                console.error('Tentando carregar de:', e.target.src);
                 e.target.style.display = 'none';
               }}
+              onLoad={() => {
+                console.log('Banner carregado com sucesso:', config.banner_url);
+              }}
             />
+          </div>
+        ) : (
+          <div style={{ marginBottom: '40px', color: 'var(--text-muted)', fontSize: '12px' }}>
+            Banner_url: {JSON.stringify(config)}
           </div>
         )}
 
