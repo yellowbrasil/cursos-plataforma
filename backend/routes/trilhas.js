@@ -31,6 +31,35 @@ router.get('/', verificarJWT, async (req, res) => {
   }
 });
 
+// Listar todas as trilhas com status de inscrição (para alunos)
+router.get('/com-status/todas', verificarJWT, async (req, res) => {
+  try {
+    // Se for professor, retorna erro
+    if (req.tipo_usuario === 'professor') {
+      return res.status(403).json({ erro: 'Acesso negado' });
+    }
+
+    const query = `
+      SELECT
+        t.*,
+        CASE
+          WHEN i.id IS NOT NULL AND i.bloqueado = FALSE THEN 'inscrito'
+          WHEN i.id IS NOT NULL AND i.bloqueado = TRUE THEN 'bloqueado'
+          ELSE 'nao_inscrito'
+        END as status_inscricao
+      FROM trilhas t
+      LEFT JOIN inscricoes i ON t.id = i.trilha_id AND i.aluno_id = $1
+      ORDER BY t.ordem ASC
+    `;
+
+    const result = await pool.query(query, [req.usuario_id]);
+    res.json(result.rows);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao listar trilhas' });
+  }
+});
+
 // Criar trilha (professor) com upload de imagem
 router.post('/', verificarJWT, verificarProfessor, uploadImagem.single('imagem'), async (req, res) => {
   try {
