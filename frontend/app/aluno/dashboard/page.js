@@ -144,6 +144,9 @@ export default function AlunoDashboardPage() {
                             borderRadius: '4px',
                             marginBottom: '15px',
                           }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
                         />
                       )}
                       <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
@@ -174,9 +177,9 @@ export default function AlunoDashboardPage() {
                   </Link>
                 ) : (
                   <div className="card">
-                    {trilha.imagem_url && (
+                    {trilha.id && (
                       <img
-                        src={trilha.imagem_url}
+                        src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
                         alt={trilha.nome}
                         style={{
                           width: '100%',
@@ -185,6 +188,9 @@ export default function AlunoDashboardPage() {
                           borderRadius: '4px',
                           marginBottom: '15px',
                           opacity: 0.6,
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
                         }}
                       />
                     )}
