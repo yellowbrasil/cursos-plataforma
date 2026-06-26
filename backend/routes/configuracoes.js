@@ -22,6 +22,34 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get banner como arquivo (evita problemas de CORS com arquivo estático)
+router.get('/banner/download', async (req, res) => {
+  try {
+    const result = await pool.query("SELECT valor FROM configuracoes WHERE chave = 'banner_url'");
+
+    if (result.rows.length === 0 || !result.rows[0].valor) {
+      return res.status(404).json({ erro: 'Banner não configurado' });
+    }
+
+    const bannerUrl = result.rows[0].valor;
+    const caminhoCompleto = path.join('./uploads', bannerUrl.replace('/uploads/', ''));
+
+    // Verificar se arquivo existe
+    if (!fs.existsSync(caminhoCompleto)) {
+      console.error('Arquivo não encontrado:', caminhoCompleto);
+      return res.status(404).json({ erro: 'Banner não encontrado' });
+    }
+
+    // Enviar arquivo com headers corretos
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.sendFile(caminhoCompleto);
+  } catch (erro) {
+    console.error('Erro ao servir banner:', erro);
+    res.status(500).json({ erro: 'Erro ao servir banner' });
+  }
+});
+
 // Update configurações (apenas professor/admin)
 router.put('/', verificarJWT, verificarProfessor, uploadImagem.single('banner'), async (req, res) => {
   try {

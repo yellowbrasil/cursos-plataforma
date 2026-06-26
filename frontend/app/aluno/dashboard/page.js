@@ -78,8 +78,7 @@ export default function AlunoDashboardPage() {
         {config.banner_url && (
           <div style={{ marginBottom: '40px' }}>
             <img
-              key={config.banner_url}
-              src={`${config.banner_url}?t=${Date.now()}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes/banner/download`}
               alt="Banner Principal AI Pro Academy"
               style={{
                 width: '100%',
@@ -89,6 +88,12 @@ export default function AlunoDashboardPage() {
                 display: 'block',
               }}
               loading="eager"
+              onError={() => {
+                console.error('Erro ao carregar banner via API');
+              }}
+              onLoad={() => {
+                console.log('Banner carregado com sucesso via API');
+              }}
             />
           </div>
         )}
