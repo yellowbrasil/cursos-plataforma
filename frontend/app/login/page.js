@@ -66,6 +66,7 @@ export default function LoginPage() {
               <input
                 id="email"
                 type="email"
+                placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -77,6 +78,7 @@ export default function LoginPage() {
               <input
                 id="senha"
                 type="password"
+                placeholder="Sua senha"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
@@ -86,7 +88,7 @@ export default function LoginPage() {
             {erro && <div className="error">{erro}</div>}
 
             <button type="submit" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? 'Entrando...' : 'Fazer Login'}
             </button>
           </form>
         </div>
