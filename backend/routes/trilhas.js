@@ -34,7 +34,7 @@ router.get('/', verificarJWT, async (req, res) => {
 // Criar trilha (professor) com upload de imagem
 router.post('/', verificarJWT, verificarProfessor, uploadImagem.single('imagem'), async (req, res) => {
   try {
-    const { nome, descricao, ordem } = req.body;
+    const { nome, descricao, sinopse, ordem } = req.body;
 
     if (!nome) {
       return res.status(400).json({ erro: 'Nome da trilha é obrigatório' });
@@ -43,8 +43,8 @@ router.post('/', verificarJWT, verificarProfessor, uploadImagem.single('imagem')
     const imagem_url = req.file ? `/uploads/imagens/${req.file.filename}` : null;
 
     const result = await pool.query(
-      'INSERT INTO trilhas (nome, descricao, ordem, imagem_url, criado_por_professor_id, criado_em) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
-      [nome, descricao || '', ordem || 1, imagem_url, req.usuario_id]
+      'INSERT INTO trilhas (nome, descricao, sinopse, ordem, imagem_url, criado_por_professor_id, criado_em) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *',
+      [nome, descricao || '', sinopse || '', ordem || 1, imagem_url, req.usuario_id]
     );
 
     res.status(201).json(result.rows[0]);
@@ -58,7 +58,7 @@ router.post('/', verificarJWT, verificarProfessor, uploadImagem.single('imagem')
 router.put('/:id', verificarJWT, verificarProfessor, uploadImagem.single('imagem'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, descricao, ordem } = req.body;
+    const { nome, descricao, sinopse, ordem } = req.body;
 
     const trilha = await pool.query('SELECT * FROM trilhas WHERE id = $1', [id]);
 
@@ -73,10 +73,11 @@ router.put('/:id', verificarJWT, verificarProfessor, uploadImagem.single('imagem
     const imagem_url = req.file ? `/uploads/imagens/${req.file.filename}` : trilha.rows[0].imagem_url;
 
     const result = await pool.query(
-      'UPDATE trilhas SET nome = $1, descricao = $2, ordem = $3, imagem_url = $4 WHERE id = $5 RETURNING *',
+      'UPDATE trilhas SET nome = $1, descricao = $2, sinopse = $3, ordem = $4, imagem_url = $5 WHERE id = $6 RETURNING *',
       [
         nome || trilha.rows[0].nome,
         descricao !== undefined ? descricao : trilha.rows[0].descricao,
+        sinopse !== undefined ? sinopse : trilha.rows[0].sinopse,
         ordem || trilha.rows[0].ordem,
         imagem_url,
         id

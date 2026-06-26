@@ -11,6 +11,7 @@ export default function ProfessorDashboardPage() {
   const [showForm, setShowForm] = useState(false);
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [sinopse, setSinopse] = useState('');
   const [imagem, setImagem] = useState(null);
   const [previewImagem, setPreviewImagem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,7 @@ export default function ProfessorDashboardPage() {
       const formData = new FormData();
       formData.append('nome', nome);
       formData.append('descricao', descricao);
+      formData.append('sinopse', sinopse);
       if (imagem) {
         formData.append('imagem', imagem);
       }
@@ -73,6 +75,7 @@ export default function ProfessorDashboardPage() {
       setTrilhas([...trilhas, response.data]);
       setNome('');
       setDescricao('');
+      setSinopse('');
       setImagem(null);
       setPreviewImagem(null);
       setShowForm(false);
@@ -142,6 +145,21 @@ export default function ProfessorDashboardPage() {
                   placeholder="Descreva o conteúdo da trilha..."
                   rows="4"
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="sinopse">Sinópse Breve</label>
+                <textarea
+                  id="sinopse"
+                  value={sinopse}
+                  onChange={(e) => setSinopse(e.target.value)}
+                  placeholder="Resumo breve do que se trata este curso (aparece abaixo da trilha)..."
+                  rows="2"
+                  maxLength="200"
+                />
+                <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                  {sinopse.length}/200 caracteres
+                </small>
               </div>
 
               <div className="form-group">
@@ -221,7 +239,12 @@ export default function ProfessorDashboardPage() {
                 <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
                   {trilha.nome}
                 </h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+                {trilha.sinopse && (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '10px', fontStyle: 'italic' }}>
+                    {trilha.sinopse}
+                  </p>
+                )}
+                <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '12px' }}>
                   {trilha.descricao}
                 </p>
                 <div style={{ display: 'flex', gap: '10px' }}>

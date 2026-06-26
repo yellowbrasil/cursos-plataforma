@@ -84,7 +84,12 @@ export default function AlunoDashboardPage() {
                   <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
                     {trilha.nome}
                   </h3>
-                  <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+                  {trilha.sinopse && (
+                    <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '10px', fontStyle: 'italic' }}>
+                      {trilha.sinopse}
+                    </p>
+                  )}
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '12px' }}>
                     {trilha.descricao}
                   </p>
                   <div style={{ color: 'var(--primary)', fontWeight: 600 }}>
