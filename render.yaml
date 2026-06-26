@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: cursos-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: "cd backend && npm install"
+    startCommand: "cd backend && npm start"
+    envVars:
+      - key: JWT_SECRET
+        value: desenvolvimento_seguro_2026_fabio_schneider_cursos
+      - key: DB_HOST
+        value: db.tkycshgylushbmxmyvul.supabase.co
+      - key: DB_PORT
+        value: 5432
+      - key: DB_USER
+        value: postgres
+      - key: DB_PASSWORD
+        value: F024151f@#$
+      - key: DB_NAME
+        value: postgres
