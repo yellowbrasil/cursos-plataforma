@@ -28,14 +28,20 @@ export default function AlunoDashboardPage() {
         setTrilhas(response.data);
       } catch (erro) {
         console.error('Erro ao buscar trilhas:', erro);
+      }
+    };
+
+    const fetchData = async () => {
+      try {
+        await fetchTrilhas();
+        await fetchConfiguracoes();
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTrilhas();
-    fetchConfiguracoes();
-  }, []);
+    fetchData();
+  }, [router]);
 
   const fetchConfiguracoes = async () => {
     try {
