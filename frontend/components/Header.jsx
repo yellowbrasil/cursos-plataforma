@@ -50,7 +50,26 @@ export default function Header() {
                 </>
               )}
               {!isProfessor && <Link href="/perfil">Perfil</Link>}
-              <button onClick={handleLogout} className="btn-secondary">
+              <button
+                onClick={handleLogout}
+                style={{
+                  backgroundColor: 'var(--primary)',
+                  color: '#000',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  transition: 'background-color 0.3s',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#ff7722';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--primary)';
+                }}
+              >
                 Sair
               </button>
             </>
