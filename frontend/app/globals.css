@@ -154,7 +154,7 @@ input:focus, textarea:focus, select:focus {
 .pulse {
   width: 12px;
   height: 12px;
-  background-color: var(--primary);
+  background-color: #ffffff;
   border-radius: 50%;
   display: inline-block;
   animation: pulse-animation 2s infinite;
@@ -163,13 +163,13 @@ input:focus, textarea:focus, select:focus {
 
 @keyframes pulse-animation {
   0% {
-    box-shadow: 0 0 0 0 rgba(246, 86, 1, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(246, 86, 1, 0);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(246, 86, 1, 0);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
   }
 }
 
