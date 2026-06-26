@@ -118,9 +118,21 @@ export default function ConfiguracoesPage() {
                   const file = e.target.files[0];
                   setBanner(file);
                   if (file) {
+                    // Validar se é imagem
+                    if (!file.type.startsWith('image/')) {
+                      alert('Por favor, selecione uma imagem válida (JPG, PNG, WebP)');
+                      setBanner(null);
+                      return;
+                    }
+
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setPreviewBanner(reader.result);
+                    reader.onload = (event) => {
+                      console.log('Preview gerado:', file.name);
+                      setPreviewBanner(event.target.result);
+                    };
+                    reader.onerror = () => {
+                      console.error('Erro ao ler arquivo');
+                      alert('Erro ao ler o arquivo');
                     };
                     reader.readAsDataURL(file);
                   }
@@ -149,6 +161,14 @@ export default function ConfiguracoesPage() {
                     objectFit: 'cover',
                     borderRadius: '4px',
                     border: '1px solid var(--border)',
+                  }}
+                  onError={(e) => {
+                    console.error('Erro ao carregar preview:', previewBanner);
+                    e.target.style.border = '2px solid #ff6b6b';
+                    e.target.style.backgroundColor = '#1a1a1a';
+                  }}
+                  onLoad={() => {
+                    console.log('Preview carregado com sucesso');
                   }}
                 />
               </div>
