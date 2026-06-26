@@ -1,37 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { pool } from '@/lib/db';
 import bcrypt from 'bcryptjs';
-import { pool } from '@/app/lib/db';
-import { sign } from '@/app/lib/auth';
+import jwt from 'jsonwebtoken';
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { email, senha } = await req.json();
+    const { email, senha } = await request.json();
 
     if (!email || !senha) {
-      return NextResponse.json({ erro: 'Email e senha são obrigatórios' }, { status: 400 });
+      return Response.json(
+        { erro: 'Email e senha são obrigatórios' },
+        { status: 400 }
+      );
     }
 
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ erro: 'Email ou senha incorretos' }, { status: 401 });
+      return Response.json(
+        { erro: 'Email ou senha inválidos' },
+        { status: 401 }
+      );
     }
 
     const usuario = result.rows[0];
-
-    if (!usuario.ativo) {
-      return NextResponse.json({ erro: 'Usuário desativado' }, { status: 403 });
-    }
-
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
 
     if (!senhaValida) {
-      return NextResponse.json({ erro: 'Email ou senha incorretos' }, { status: 401 });
+      return Response.json(
+        { erro: 'Email ou senha inválidos' },
+        { status: 401 }
+      );
     }
 
-    const token = sign({ usuario_id: usuario.id, tipo: usuario.tipo });
+    const token = jwt.sign(
+      { usuario_id: usuario.id, tipo: usuario.tipo },
+      process.env.JWT_SECRET || 'desenvolvimento_seguro_2026_fabio_schneider_cursos',
+      { expiresIn: '1h' }
+    );
 
-    return NextResponse.json({
+    return Response.json({
       token,
       usuario: {
         id: usuario.id,
@@ -41,7 +51,10 @@ export async function POST(req) {
       },
     });
   } catch (erro) {
-    console.error(erro);
-    return NextResponse.json({ erro: 'Erro ao fazer login' }, { status: 500 });
+    console.error('Erro no login:', erro);
+    return Response.json(
+      { erro: 'Erro ao fazer login' },
+      { status: 500 }
+    );
   }
 }
