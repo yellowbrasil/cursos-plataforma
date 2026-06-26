@@ -73,30 +73,29 @@ export default function AlunoDashboardPage() {
   return (
     <>
       <Header />
-      <div className="container" style={{ marginTop: '40px' }}>
 
-        {config.banner_url && (
-          <div style={{ marginBottom: '40px' }}>
-            <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes/banner/download`}
-              alt="Banner Principal AI Pro Academy"
-              style={{
-                width: '100%',
-                height: 'auto',
-                maxHeight: '300px',
-                borderRadius: '8px',
-                display: 'block',
-              }}
-              loading="eager"
-              onError={() => {
-                console.error('Erro ao carregar banner via API');
-              }}
-              onLoad={() => {
-                console.log('Banner carregado com sucesso via API');
-              }}
-            />
-          </div>
-        )}
+      {/* Banner em tela cheia */}
+      {config.banner_url && (
+        <div style={{
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginTop: '20px',
+          marginBottom: '40px',
+        }}>
+          <img
+            src={`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes/banner/download`}
+            alt="Banner Principal AI Pro Academy"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+            }}
+            loading="eager"
+          />
+        </div>
+      )}
+
+      <div className="container" style={{ marginTop: '40px' }}>
 
 
         <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
