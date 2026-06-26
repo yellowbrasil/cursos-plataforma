@@ -74,6 +74,10 @@ export default function AlunoDashboardPage() {
                 objectFit: 'cover',
                 borderRadius: '8px',
               }}
+              onError={(e) => {
+                console.error('Erro ao carregar banner:', config.banner_url);
+                e.target.style.display = 'none';
+              }}
             />
           </div>
         )}
