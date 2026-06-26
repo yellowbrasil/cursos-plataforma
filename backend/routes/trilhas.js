@@ -2,6 +2,8 @@ import express from 'express';
 import { pool } from '../server.js';
 import { verificarJWT, verificarProfessor } from '../middleware/auth.js';
 import { uploadImagem } from '../middleware/uploadImagem.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
