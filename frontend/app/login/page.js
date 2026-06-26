@@ -58,7 +58,23 @@ export default function LoginPage() {
       <Header />
       <div className="login-container">
         <div className="login-card">
-          <h1>Login</h1>
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              backgroundColor: 'var(--primary)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 15px',
+              fontSize: '32px'
+            }}>
+              🔒
+            </div>
+            <h2 style={{ fontSize: '24px', marginBottom: '8px', color: '#fff' }}>IA PRO ACADEMY</h2>
+            <p style={{ color: '#999', fontSize: '14px' }}>Inicie sessão para acessar aos cursos</p>
+          </div>
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
