@@ -70,10 +70,26 @@ export default function AlunoDashboardPage() {
     );
   }
 
+  console.log('Renderizando dashboard. Config:', config);
+
   return (
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
+        {/* DEBUG VISÍVEL */}
+        <div style={{
+          backgroundColor: '#222',
+          padding: '10px',
+          marginBottom: '20px',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: '#999',
+          fontFamily: 'monospace',
+        }}>
+          <div>config.banner_url = {config.banner_url ? '✅ ' + config.banner_url : '❌ undefined/vazio'}</div>
+          <div>config object = {JSON.stringify(config)}</div>
+        </div>
+
         {config.banner_url ? (
           <div style={{ marginBottom: '40px' }}>
             <img
@@ -84,20 +100,27 @@ export default function AlunoDashboardPage() {
                 height: '250px',
                 objectFit: 'cover',
                 borderRadius: '8px',
+                border: '2px solid var(--primary)',
               }}
               onError={(e) => {
-                console.error('Erro ao carregar banner:', config.banner_url);
-                console.error('Tentando carregar de:', e.target.src);
+                console.error('❌ Erro ao carregar banner:', config.banner_url);
                 e.target.style.display = 'none';
               }}
               onLoad={() => {
-                console.log('Banner carregado com sucesso:', config.banner_url);
+                console.log('✅ Banner carregado:', config.banner_url);
               }}
             />
           </div>
         ) : (
-          <div style={{ marginBottom: '40px', color: 'var(--text-muted)', fontSize: '12px' }}>
-            Banner_url: {JSON.stringify(config)}
+          <div style={{
+            padding: '20px',
+            backgroundColor: '#1a1a1a',
+            borderRadius: '4px',
+            marginBottom: '40px',
+            borderLeft: '4px solid #ff6b6b',
+            color: '#ff6b6b',
+          }}>
+            ⚠️ BANNER NÃO ENCONTRADO (config.banner_url vazio)
           </div>
         )}
 
