@@ -84,7 +84,7 @@ export default function AlunoDashboardPage() {
         }}>
           <img
             src={`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes/banner/download`}
-            alt="Banner Principal AI Pro Academy"
+            alt="Banner Principal AI PRO ACADEMY"
             style={{
               width: '100%',
               height: 'auto',
