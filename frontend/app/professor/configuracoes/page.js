@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Header from '@/components/Header';
+import ProfessorMenu from '@/components/ProfessorMenu';
 import Footer from '@/components/Footer';
 
 export default function ConfiguracoesPage() {
-  const [abaAtiva, setAbaAtiva] = useState('banner');
-  const [linkAsaas, setLinkAsaas] = useState('');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab') || 'banner';
+  const [abaAtiva, setAbaAtiva] = useState(tabParam);
+
   const [aviso, setAviso] = useState('');
   const [banner, setBanner] = useState(null);
   const [previewBanner, setPreviewBanner] = useState('');
@@ -28,10 +31,13 @@ export default function ConfiguracoesPage() {
     fetchConfiguracoes();
   }, [token]);
 
+  useEffect(() => {
+    setAbaAtiva(tabParam);
+  }, [tabParam]);
+
   const fetchConfiguracoes = async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`);
-      setLinkAsaas(response.data.link_asaas || '');
       setAviso(response.data.aviso_alunos || '');
       if (response.data.banner_url) {
         setPreviewBanner(response.data.banner_url);
@@ -50,7 +56,6 @@ export default function ConfiguracoesPage() {
 
     try {
       const formData = new FormData();
-      formData.append('link_asaas', linkAsaas);
       formData.append('aviso_alunos', aviso);
       if (banner) {
         formData.append('banner', banner);
@@ -67,7 +72,7 @@ export default function ConfiguracoesPage() {
         }
       );
 
-      setMensagem('Configurações salvas com sucesso!');
+      setMensagem('✅ Configurações salvas com sucesso!');
       setBanner(null);
       if (response.data.banner_url) {
         setPreviewBanner(response.data.banner_url);
@@ -75,7 +80,7 @@ export default function ConfiguracoesPage() {
 
       setTimeout(() => setMensagem(''), 3000);
     } catch (erro) {
-      setMensagem(erro.response?.data?.erro || 'Erro ao salvar configurações');
+      setMensagem('❌ ' + (erro.response?.data?.erro || 'Erro ao salvar'));
     } finally {
       setSalvando(false);
     }
@@ -85,7 +90,8 @@ export default function ConfiguracoesPage() {
     return (
       <>
         <Header />
-        <div className="container" style={{ marginTop: '40px' }}>
+        <ProfessorMenu />
+        <div className="container" style={{ marginTop: '40px', marginLeft: '250px' }}>
           <p>Carregando...</p>
         </div>
         <Footer />
@@ -94,15 +100,15 @@ export default function ConfiguracoesPage() {
   }
 
   const abas = [
-    { id: 'banner', label: '🖼️ Banner', icon: '🖼️' },
-    { id: 'avisos', label: '📢 Avisos', icon: '📢' },
-    { id: 'asaas', label: '💳 Asaas', icon: '💳' },
+    { id: 'banner', label: '🖼️ Banner' },
+    { id: 'avisos', label: '📢 Avisos' },
   ];
 
   return (
     <>
       <Header />
-      <div className="container" style={{ marginTop: '40px', marginBottom: '60px', maxWidth: '700px' }}>
+      <ProfessorMenu />
+      <div className="container" style={{ marginTop: '40px', marginBottom: '60px', maxWidth: '600px', marginLeft: '250px' }}>
         <h1 style={{ marginBottom: '30px' }}>
           <span className="pulse" style={{ marginRight: '12px' }}></span>Configurações
         </h1>
@@ -113,12 +119,14 @@ export default function ConfiguracoesPage() {
           gap: '0',
           marginBottom: '20px',
           borderBottom: '2px solid var(--border)',
-          overflow: 'auto',
         }}>
           {abas.map((aba) => (
             <button
               key={aba.id}
-              onClick={() => setAbaAtiva(aba.id)}
+              onClick={() => {
+                setAbaAtiva(aba.id);
+                router.push(`?tab=${aba.id}`);
+              }}
               style={{
                 padding: '12px 20px',
                 backgroundColor: abaAtiva === aba.id ? 'var(--primary)' : 'transparent',
@@ -129,7 +137,6 @@ export default function ConfiguracoesPage() {
                 fontWeight: abaAtiva === aba.id ? '600' : '400',
                 fontSize: '14px',
                 transition: 'all 0.3s',
-                whiteSpace: 'nowrap',
               }}
               onMouseEnter={(e) => {
                 if (abaAtiva !== aba.id) e.target.style.backgroundColor = '#1a1a1a';
@@ -267,58 +274,6 @@ export default function ConfiguracoesPage() {
             </div>
           )}
 
-          {/* ABA: Link Asaas */}
-          {abaAtiva === 'asaas' && (
-            <div>
-              <h2 style={{ fontSize: '18px', color: 'var(--primary)', marginBottom: '15px' }}>
-                Link do Asaas
-              </h2>
-
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '15px' }}>
-                Link para onde os alunos serão direcionados para pagamento/autorização.
-                <br />
-                Aparece como botão "Comprar Acesso" nas trilhas não inscritas.
-              </p>
-
-              <div className="form-group">
-                <label htmlFor="linkAsaas">URL do Asaas</label>
-                <input
-                  id="linkAsaas"
-                  type="url"
-                  value={linkAsaas}
-                  onChange={(e) => setLinkAsaas(e.target.value)}
-                  placeholder="https://asaas.com/..."
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    backgroundColor: 'transparent',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                  }}
-                />
-              </div>
-
-              {linkAsaas && (
-                <div style={{
-                  backgroundColor: '#1a1a1a',
-                  padding: '12px',
-                  borderRadius: '4px',
-                  marginTop: '15px',
-                  fontSize: '12px',
-                  borderLeft: '3px solid var(--primary)',
-                  color: 'var(--text-muted)',
-                  wordBreak: 'break-all',
-                }}>
-                  <strong>Link salvo:</strong>
-                  <br />
-                  {linkAsaas}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* MENSAGEM E BOTÃO */}
           {mensagem && (
             <div
@@ -326,10 +281,11 @@ export default function ConfiguracoesPage() {
                 padding: '12px',
                 borderRadius: '4px',
                 marginBottom: '20px',
-                backgroundColor: mensagem.includes('sucesso')
+                marginTop: '20px',
+                backgroundColor: mensagem.includes('✅')
                   ? 'rgba(81, 207, 102, 0.1)'
                   : 'rgba(255, 107, 107, 0.1)',
-                color: mensagem.includes('sucesso') ? '#51cf66' : '#ff6b6b',
+                color: mensagem.includes('✅') ? '#51cf66' : '#ff6b6b',
                 fontSize: '13px',
               }}
             >
@@ -343,7 +299,7 @@ export default function ConfiguracoesPage() {
             disabled={salvando}
             style={{ width: '100%', marginTop: '20px' }}
           >
-            {salvando ? 'Salvando...' : 'Salvar Configurações'}
+            {salvando ? 'Salvando...' : '💾 Salvar Configurações'}
           </button>
         </form>
       </div>

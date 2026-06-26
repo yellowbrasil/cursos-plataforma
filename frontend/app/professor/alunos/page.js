@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Header from '@/components/Header';
+import ProfessorMenu from '@/components/ProfessorMenu';
 import Footer from '@/components/Footer';
 
 export default function AlunosPage() {
@@ -159,7 +160,8 @@ export default function AlunosPage() {
   return (
     <>
       <Header />
-      <div className="container" style={{ marginTop: '40px', marginBottom: '60px' }}>
+      <ProfessorMenu />
+      <div className="container" style={{ marginTop: '40px', marginBottom: '60px', marginLeft: '250px' }}>
         <h1 style={{ marginBottom: '30px' }}>
           <span className="pulse" style={{ marginRight: '12px' }}></span>Gerenciar Alunos
         </h1>

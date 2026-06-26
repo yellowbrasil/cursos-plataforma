@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Header from '@/components/Header';
+import ProfessorMenu from '@/components/ProfessorMenu';
 import './professor.css';
 
 export default function ProfessorDashboardPage() {
@@ -116,7 +117,8 @@ export default function ProfessorDashboardPage() {
   return (
     <>
       <Header />
-      <div className="container" style={{ marginTop: '40px' }}>
+      <ProfessorMenu />
+      <div className="container" style={{ marginTop: '40px', marginLeft: '250px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas</h1>
           <button onClick={() => setShowForm(!showForm)} className="btn-primary">
