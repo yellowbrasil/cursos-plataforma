@@ -70,67 +70,29 @@ export default function AlunoDashboardPage() {
     );
   }
 
-  console.log('Renderizando dashboard. Config:', config);
-
   return (
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
-        {/* DEBUG VISÍVEL */}
-        <div style={{
-          backgroundColor: '#222',
-          padding: '10px',
-          marginBottom: '20px',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: '#999',
-          fontFamily: 'monospace',
-        }}>
-          <div>config.banner_url = {config.banner_url ? '✅ ' + config.banner_url : '❌ undefined/vazio'}</div>
-          <div>config object = {JSON.stringify(config)}</div>
-        </div>
 
         {config.banner_url && (
           <div style={{ marginBottom: '40px' }}>
-            <div style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>
-              📍 Tentando carregar: {config.banner_url}
-            </div>
             <img
-              src={config.banner_url}
-              alt="Banner Principal"
+              key={config.banner_url}
+              src={`${config.banner_url}?t=${Date.now()}`}
+              alt="Banner Principal AI Pro Academy"
               style={{
                 width: '100%',
-                height: '250px',
-                objectFit: 'cover',
+                height: 'auto',
+                maxHeight: '300px',
                 borderRadius: '8px',
-                border: '2px solid var(--primary)',
-                backgroundColor: '#1a1a1a',
+                display: 'block',
               }}
-              onError={(e) => {
-                console.error('❌ Erro ao carregar banner. Src:', e.target.src);
-                console.error('Status:', e.type);
-                e.target.style.border = '2px solid #ff6b6b';
-              }}
-              onLoad={(e) => {
-                console.log('✅ Banner carregado com sucesso!');
-                e.target.style.border = '2px solid #51cf66';
-              }}
+              loading="eager"
             />
           </div>
         )}
 
-        {!config.banner_url && (
-          <div style={{
-            padding: '20px',
-            backgroundColor: '#1a1a1a',
-            borderRadius: '4px',
-            marginBottom: '40px',
-            borderLeft: '4px solid #ff6b6b',
-            color: '#ff6b6b',
-          }}>
-            ⚠️ BANNER NÃO ENCONTRADO
-          </div>
-        )}
 
         <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
 
