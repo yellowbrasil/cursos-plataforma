@@ -29,28 +29,30 @@ export default function ProfessorMenu() {
       <Link href="/professor/dashboard">
         <div style={{
           padding: '12px 20px',
-          color: isAtivo('/professor/dashboard') && !isConfigAtivo ? '#000' : 'rgba(0,0,0,0.7)',
+          color: '#fff',
           cursor: 'pointer',
-          fontSize: '14px',
+          fontSize: '16px',
           transition: 'all 0.3s',
-          borderLeft: isAtivo('/professor/dashboard') && !isConfigAtivo ? '3px solid #000' : '3px solid transparent',
-          paddingLeft: '17px',
-          fontWeight: isAtivo('/professor/dashboard') && !isConfigAtivo ? '600' : '400',
+          borderLeft: isAtivo('/professor/dashboard') && !isConfigAtivo ? '4px solid #fff' : '4px solid transparent',
+          paddingLeft: '16px',
+          fontWeight: isAtivo('/professor/dashboard') && !isConfigAtivo ? '600' : '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
         }}
         onMouseEnter={(e) => {
           if (!isAtivo('/professor/dashboard')) {
-            e.currentTarget.style.color = '#000';
             e.currentTarget.style.backgroundColor = '#ff7722';
           }
         }}
         onMouseLeave={(e) => {
           if (!isAtivo('/professor/dashboard')) {
-            e.currentTarget.style.color = 'rgba(0,0,0,0.7)';
             e.currentTarget.style.backgroundColor = 'transparent';
           }
         }}
         >
-          📊 Dashboard
+          <span className="pulse" style={{ width: '8px', height: '8px' }}></span>
+          Dashboard
         </div>
       </Link>
 
@@ -58,28 +60,30 @@ export default function ProfessorMenu() {
       <Link href="/professor/alunos">
         <div style={{
           padding: '12px 20px',
-          color: isAtivo('/professor/alunos') ? '#000' : 'rgba(0,0,0,0.7)',
+          color: '#fff',
           cursor: 'pointer',
-          fontSize: '14px',
+          fontSize: '16px',
           transition: 'all 0.3s',
-          borderLeft: isAtivo('/professor/alunos') ? '3px solid #000' : '3px solid transparent',
-          paddingLeft: '17px',
-          fontWeight: isAtivo('/professor/alunos') ? '600' : '400',
+          borderLeft: isAtivo('/professor/alunos') ? '4px solid #fff' : '4px solid transparent',
+          paddingLeft: '16px',
+          fontWeight: isAtivo('/professor/alunos') ? '600' : '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
         }}
         onMouseEnter={(e) => {
           if (!isAtivo('/professor/alunos')) {
-            e.currentTarget.style.color = '#000';
             e.currentTarget.style.backgroundColor = '#ff7722';
           }
         }}
         onMouseLeave={(e) => {
           if (!isAtivo('/professor/alunos')) {
-            e.currentTarget.style.color = 'rgba(0,0,0,0.7)';
             e.currentTarget.style.backgroundColor = 'transparent';
           }
         }}
         >
-          👥 Alunos
+          <span className="pulse" style={{ width: '8px', height: '8px' }}></span>
+          Alunos
         </div>
       </Link>
 
@@ -89,44 +93,48 @@ export default function ProfessorMenu() {
           onClick={() => setConfigAberta(!configAberta)}
           style={{
             padding: '12px 20px',
-            color: isConfigAtivo ? '#000' : 'rgba(0,0,0,0.7)',
+            color: '#fff',
             cursor: 'pointer',
-            fontSize: '14px',
+            fontSize: '16px',
             transition: 'all 0.3s',
-            borderLeft: isConfigAtivo ? '3px solid #000' : '3px solid transparent',
-            paddingLeft: '17px',
+            borderLeft: isConfigAtivo ? '4px solid #fff' : '4px solid transparent',
+            paddingLeft: '16px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            fontWeight: isConfigAtivo ? '600' : '400',
+            fontWeight: isConfigAtivo ? '600' : '500',
           }}
           onMouseEnter={(e) => {
             if (!isConfigAtivo) {
-              e.currentTarget.style.color = '#000';
               e.currentTarget.style.backgroundColor = '#ff7722';
             }
           }}
           onMouseLeave={(e) => {
             if (!isConfigAtivo) {
-              e.currentTarget.style.color = 'rgba(0,0,0,0.7)';
               e.currentTarget.style.backgroundColor = 'transparent';
             }
           }}
         >
-          <span>⚙️ Configurações</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span className="pulse" style={{ width: '8px', height: '8px' }}></span>
+            Configurações
+          </span>
           <span style={{ fontSize: '12px', transform: configAberta ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▼</span>
         </div>
 
         {/* Submenu */}
         {configAberta && (
-          <div style={{ backgroundColor: '#ff7722', borderLeft: '1px solid #000' }}>
+          <div style={{ backgroundColor: '#ff7722', borderLeft: '1px solid #fff' }}>
             <Link href="/professor/configuracoes?tab=banner">
               <div style={{
                 padding: '10px 20px 10px 40px',
-                color: '#000',
+                color: '#fff',
                 cursor: 'pointer',
-                fontSize: '13px',
+                fontSize: '14px',
                 transition: 'all 0.3s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#ff8833';
@@ -134,20 +142,24 @@ export default function ProfessorMenu() {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.fontWeight = '400';
+                e.currentTarget.style.fontWeight = '500';
               }}
               >
-                🖼️ Banner
+                <span className="pulse" style={{ width: '6px', height: '6px' }}></span>
+                Banner
               </div>
             </Link>
 
             <Link href="/professor/configuracoes?tab=avisos">
               <div style={{
                 padding: '10px 20px 10px 40px',
-                color: '#000',
+                color: '#fff',
                 cursor: 'pointer',
-                fontSize: '13px',
+                fontSize: '14px',
                 transition: 'all 0.3s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#ff8833';
@@ -155,10 +167,11 @@ export default function ProfessorMenu() {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.fontWeight = '400';
+                e.currentTarget.style.fontWeight = '500';
               }}
               >
-                📢 Avisos
+                <span className="pulse" style={{ width: '6px', height: '6px' }}></span>
+                Avisos
               </div>
             </Link>
           </div>
