@@ -225,9 +225,9 @@ export default function ProfessorDashboardPage() {
           <div className="trilhas-grid">
             {trilhas.map((trilha) => (
               <div key={trilha.id} className="card">
-                {trilha.imagem_url && (
+                {trilha.id && (
                   <img
-                    src={trilha.imagem_url}
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
                     alt={trilha.nome}
                     style={{
                       width: '100%',
@@ -235,6 +235,9 @@ export default function ProfessorDashboardPage() {
                       objectFit: 'cover',
                       borderRadius: '4px',
                       marginBottom: '15px',
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
                     }}
                   />
                 )}

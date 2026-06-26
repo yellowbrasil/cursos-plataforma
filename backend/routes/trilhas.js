@@ -145,4 +145,32 @@ router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
   }
 });
 
+// Get imagem da trilha (público)
+router.get('/:id/imagem', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const trilha = await pool.query('SELECT imagem_url FROM trilhas WHERE id = $1', [id]);
+
+    if (trilha.rows.length === 0 || !trilha.rows[0].imagem_url) {
+      return res.status(404).json({ erro: 'Imagem não encontrada' });
+    }
+
+    const imagemUrl = trilha.rows[0].imagem_url;
+    const caminhoRelativo = imagemUrl.replace('/uploads/', '');
+    const caminhoCompleto = path.resolve('./uploads', caminhoRelativo);
+
+    if (!fs.existsSync(caminhoCompleto)) {
+      return res.status(404).json({ erro: 'Arquivo não encontrado' });
+    }
+
+    res.sendFile(caminhoCompleto, (err) => {
+      if (err) console.error('Erro ao servir imagem:', err);
+    });
+  } catch (erro) {
+    console.error('Erro ao servir imagem da trilha:', erro);
+    res.status(500).json({ erro: 'Erro ao servir imagem' });
+  }
+});
+
 export default router;

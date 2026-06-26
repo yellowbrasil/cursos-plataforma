@@ -133,9 +133,9 @@ export default function AlunoDashboardPage() {
                 {trilha.status_inscricao === 'inscrito' ? (
                   <Link href={`/aluno/trilha/${trilha.id}`}>
                     <div className="card" style={{ cursor: 'pointer', transition: 'all 0.3s' }}>
-                      {trilha.imagem_url && (
+                      {trilha.id && (
                         <img
-                          src={trilha.imagem_url}
+                          src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
                           alt={trilha.nome}
                           style={{
                             width: '100%',
