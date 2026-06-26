@@ -11,6 +11,8 @@ export default function ProfessorDashboardPage() {
   const [showForm, setShowForm] = useState(false);
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [imagem, setImagem] = useState(null);
+  const [previewImagem, setPreviewImagem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const router = useRouter();
@@ -50,15 +52,29 @@ export default function ProfessorDashboardPage() {
     }
 
     try {
+      const formData = new FormData();
+      formData.append('nome', nome);
+      formData.append('descricao', descricao);
+      if (imagem) {
+        formData.append('imagem', imagem);
+      }
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas`,
-        { nome, descricao },
-        { headers: { Authorization: `Bearer ${token}` } }
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
       );
 
       setTrilhas([...trilhas, response.data]);
       setNome('');
       setDescricao('');
+      setImagem(null);
+      setPreviewImagem(null);
       setShowForm(false);
     } catch (erro) {
       setErro(erro.response?.data?.erro || 'Erro ao criar trilha');
@@ -128,6 +144,52 @@ export default function ProfessorDashboardPage() {
                 />
               </div>
 
+              <div className="form-group">
+                <label htmlFor="imagem">Imagem Ilustrativa (375x165)</label>
+                <input
+                  id="imagem"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    setImagem(file);
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setPreviewImagem(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  style={{
+                    padding: '8px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                />
+              </div>
+
+              {previewImagem && (
+                <div style={{ marginBottom: '15px' }}>
+                  <p style={{ fontSize: '12px', marginBottom: '8px', color: 'var(--text-muted)' }}>
+                    Preview da imagem:
+                  </p>
+                  <img
+                    src={previewImagem}
+                    alt="Preview"
+                    style={{
+                      width: '100%',
+                      maxWidth: '375px',
+                      height: '165px',
+                      objectFit: 'cover',
+                      borderRadius: '4px',
+                      border: '1px solid var(--border)',
+                    }}
+                  />
+                </div>
+              )}
+
               {erro && <div className="error">{erro}</div>}
 
               <button type="submit" className="btn-primary">
@@ -143,6 +205,19 @@ export default function ProfessorDashboardPage() {
           <div className="trilhas-grid">
             {trilhas.map((trilha) => (
               <div key={trilha.id} className="card">
+                {trilha.imagem_url && (
+                  <img
+                    src={trilha.imagem_url}
+                    alt={trilha.nome}
+                    style={{
+                      width: '100%',
+                      height: '165px',
+                      objectFit: 'cover',
+                      borderRadius: '4px',
+                      marginBottom: '15px',
+                    }}
+                  />
+                )}
                 <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
                   {trilha.nome}
                 </h3>

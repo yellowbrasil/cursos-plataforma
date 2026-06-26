@@ -68,6 +68,19 @@ export default function AlunoDashboardPage() {
             {trilhas.map((trilha) => (
               <Link key={trilha.id} href={`/aluno/trilha/${trilha.id}`}>
                 <div className="card" style={{ cursor: 'pointer', transition: 'all 0.3s' }}>
+                  {trilha.imagem_url && (
+                    <img
+                      src={trilha.imagem_url}
+                      alt={trilha.nome}
+                      style={{
+                        width: '100%',
+                        height: '165px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        marginBottom: '15px',
+                      }}
+                    />
+                  )}
                   <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
                     {trilha.nome}
                   </h3>
