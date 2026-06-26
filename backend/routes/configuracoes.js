@@ -56,13 +56,21 @@ router.get('/banner/download', async (req, res) => {
 // Update configurações (apenas professor/admin)
 router.put('/', verificarJWT, verificarProfessor, uploadImagem.single('banner'), async (req, res) => {
   try {
-    const { link_asaas } = req.body;
+    const { link_asaas, aviso_alunos } = req.body;
 
     // Atualizar link do Asaas
     if (link_asaas !== undefined) {
       await pool.query(
         'UPDATE configuracoes SET valor = $1, atualizado_em = NOW() WHERE chave = $2',
         [link_asaas, 'link_asaas']
+      );
+    }
+
+    // Atualizar aviso para alunos
+    if (aviso_alunos !== undefined) {
+      await pool.query(
+        'UPDATE configuracoes SET valor = $1, atualizado_em = NOW() WHERE chave = $2',
+        [aviso_alunos, 'aviso_alunos']
       );
     }
 

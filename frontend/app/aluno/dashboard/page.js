@@ -98,6 +98,21 @@ export default function AlunoDashboardPage() {
       <div className="container" style={{ marginTop: '40px' }}>
 
 
+        {config.aviso_alunos && (
+          <div style={{
+            backgroundColor: 'var(--primary)',
+            color: '#000',
+            padding: '16px',
+            borderRadius: '4px',
+            marginBottom: '30px',
+            fontWeight: '600',
+            fontSize: '14px',
+            lineHeight: '1.5',
+          }}>
+            📢 {config.aviso_alunos}
+          </div>
+        )}
+
         <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
 
         {trilhas.length === 0 ? (

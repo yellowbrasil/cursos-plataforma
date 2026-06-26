@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 
 export default function ConfiguracoesPage() {
   const [linkAsaas, setLinkAsaas] = useState('');
+  const [aviso, setAviso] = useState('');
   const [banner, setBanner] = useState(null);
   const [previewBanner, setPreviewBanner] = useState('');
   const [carregando, setCarregando] = useState(true);
@@ -30,6 +31,7 @@ export default function ConfiguracoesPage() {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`);
       setLinkAsaas(response.data.link_asaas || '');
+      setAviso(response.data.aviso_alunos || '');
       if (response.data.banner_url) {
         setPreviewBanner(response.data.banner_url);
       }
@@ -48,6 +50,7 @@ export default function ConfiguracoesPage() {
     try {
       const formData = new FormData();
       formData.append('link_asaas', linkAsaas);
+      formData.append('aviso_alunos', aviso);
       if (banner) {
         formData.append('banner', banner);
       }
@@ -195,6 +198,46 @@ export default function ConfiguracoesPage() {
                 placeholder="https://asaas.com/..."
               />
             </div>
+          </div>
+
+          {/* Aviso para Alunos */}
+          <div style={{ marginBottom: '30px' }}>
+            <h2 style={{ fontSize: '18px', color: 'var(--primary)', marginBottom: '15px' }}>
+              Aviso para Alunos
+            </h2>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '12px' }}>
+              Escreva um recado que aparecerá no rodapé da área restrita dos alunos (em tarja laranja).
+              Útil para avisos sobre novas aulas, regras, manutenção, etc.
+            </p>
+
+            <div className="form-group">
+              <label htmlFor="aviso">Mensagem de Aviso</label>
+              <textarea
+                id="aviso"
+                value={aviso}
+                onChange={(e) => setAviso(e.target.value)}
+                placeholder="Ex: Nova aula adicionada à trilha de IA! Confira em breve."
+                rows="3"
+                maxLength="500"
+              />
+              <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                {aviso.length}/500 caracteres
+              </small>
+            </div>
+
+            {aviso && (
+              <div style={{
+                backgroundColor: 'var(--primary)',
+                color: '#000',
+                padding: '12px',
+                borderRadius: '4px',
+                marginTop: '12px',
+                fontSize: '13px',
+              }}>
+                <strong>Preview:</strong> {aviso}
+              </div>
+            )}
           </div>
 
           {mensagem && (
