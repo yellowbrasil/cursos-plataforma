@@ -18,18 +18,18 @@ export default function ConfiguracoesPage() {
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
+  const [token, setToken] = useState(null);
   const router = useRouter();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
-    if (!token) {
+    const t = localStorage.getItem('token');
+    if (!t) {
       router.push('/login');
       return;
     }
-
+    setToken(t);
     fetchConfiguracoes();
-  }, [token]);
+  }, [router]);
 
   useEffect(() => {
     setAbaAtiva(tabParam);

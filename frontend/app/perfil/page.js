@@ -14,9 +14,8 @@ export default function PerfilPage() {
   const [erro, setErro] = useState('');
   const router = useRouter();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
+    const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');
       return;
@@ -26,7 +25,7 @@ export default function PerfilPage() {
     if (usuarioLocal) {
       setUsuario(JSON.parse(usuarioLocal));
     }
-  }, [token]);
+  }, [router]);
 
   const handleMudarSenha = async (e) => {
     e.preventDefault();

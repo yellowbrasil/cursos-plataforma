@@ -14,25 +14,25 @@ export default function AlunosPage() {
   const [alunosSelecionados, setAlunosSelecionados] = useState([]);
   const [alunosInscritos, setAlunosInscritos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
   const router = useRouter();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
-    if (!token) {
+    const t = localStorage.getItem('token');
+    if (!t) {
       router.push('/login');
       return;
     }
+    setToken(t);
+    fetchTrilhas(t);
+    fetchAlunos(t);
+  }, [router]);
 
-    fetchTrilhas();
-    fetchAlunos();
-  }, [token]);
-
-  const fetchTrilhas = async () => {
+  const fetchTrilhas = async (t) => {
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       setTrilhas(response.data);
     } catch (erro) {
@@ -42,11 +42,11 @@ export default function AlunosPage() {
     }
   };
 
-  const fetchAlunos = async () => {
+  const fetchAlunos = async (t) => {
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/alunos`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       setAlunosCadastrados(response.data);
     } catch (erro) {
@@ -54,11 +54,11 @@ export default function AlunosPage() {
     }
   };
 
-  const fetchAlunosInscritos = async (trilhaId) => {
+  const fetchAlunosInscritos = async (trilhaId, t) => {
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/trilha/${trilhaId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       setAlunosInscritos(response.data);
     } catch (erro) {
@@ -69,7 +69,7 @@ export default function AlunosPage() {
   const handleSelecionarTrilha = (trilhaId) => {
     setTrilhaSelecionada(trilhaId);
     setAlunosSelecionados([]);
-    fetchAlunosInscritos(trilhaId);
+    fetchAlunosInscritos(trilhaId, token);
   };
 
   const handleInscreverAlunos = async () => {

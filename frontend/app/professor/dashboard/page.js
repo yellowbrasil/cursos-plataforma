@@ -17,24 +17,24 @@ export default function ProfessorDashboardPage() {
   const [previewImagem, setPreviewImagem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
+  const [token, setToken] = useState(null);
   const router = useRouter();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
-    if (!token) {
+    const t = localStorage.getItem('token');
+    if (!t) {
       router.push('/login');
       return;
     }
+    setToken(t);
+    fetchTrilhas(t);
+  }, [router]);
 
-    fetchTrilhas();
-  }, [token]);
-
-  const fetchTrilhas = async () => {
+  const fetchTrilhas = async (t) => {
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       setTrilhas(response.data);
     } catch (erro) {

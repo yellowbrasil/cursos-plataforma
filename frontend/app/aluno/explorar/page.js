@@ -10,26 +10,28 @@ export default function ExplorarPage() {
   const [trilhasInscritas, setTrilhasInscritas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inscrevendo, setInscrevendo] = useState(null);
+  const [token, setToken] = useState(null);
   const router = useRouter();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
-    if (!token) {
+    const t = localStorage.getItem('token');
+    const usuario = localStorage.getItem('usuario');
+    if (!t) {
       router.push('/login');
       return;
     }
+    setToken(t);
 
     const fetch = async () => {
       try {
         // Buscar todas as trilhas (admin only, vamos usar uma query simples)
         const [listarRes, minhasRes] = await Promise.all([
           axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${t}` },
           }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/inscricoes/aluno/${JSON.parse(localStorage.getItem('usuario')).id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }).catch(() => ({ data: [] })),
+          usuario ? axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/inscricoes/aluno/${JSON.parse(usuario).id}`, {
+            headers: { Authorization: `Bearer ${t}` },
+          }).catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
         ]);
 
         setTodasTrilhas(listarRes.data);
@@ -42,7 +44,7 @@ export default function ExplorarPage() {
     };
 
     fetch();
-  }, [token]);
+  }, [router]);
 
   const handleInscrever = async (trilhaId) => {
     setInscrevendo(trilhaId);

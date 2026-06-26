@@ -38,22 +38,23 @@ export default function TrilhaPage() {
   const [licaoSelecionada, setLicaoSelecionada] = useState(null);
   const [materiais, setMateriais] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
   const router = useRouter();
   const params = useParams();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
-    if (!token) {
+    const t = localStorage.getItem('token');
+    if (!t) {
       router.push('/login');
       return;
     }
+    setToken(t);
 
     const fetchTrilha = async () => {
       try {
         const modulosRes = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/api/modulos/trilha/${params.id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${t}` } }
         );
 
         setModulos(modulosRes.data);
@@ -63,7 +64,7 @@ export default function TrilhaPage() {
         for (const modulo of modulosRes.data) {
           const licoesRes = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}/api/licoes/modulo/${modulo.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${t}` } }
           );
           mapaLicoes[modulo.id] = licoesRes.data;
         }
@@ -76,7 +77,7 @@ export default function TrilhaPage() {
     };
 
     fetchTrilha();
-  }, [params.id, token]);
+  }, [router, params.id]);
 
   const handleLicaoClique = async (licao) => {
     setLicaoSelecionada(licao);
