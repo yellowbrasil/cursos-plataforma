@@ -8,6 +8,7 @@ import axios from 'axios';
 
 export default function AlunoDashboardPage() {
   const [trilhas, setTrilhas] = useState([]);
+  const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -33,7 +34,19 @@ export default function AlunoDashboardPage() {
     };
 
     fetchTrilhas();
+    fetchConfiguracoes();
   }, []);
+
+  const fetchConfiguracoes = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`
+      );
+      setConfig(response.data);
+    } catch (erro) {
+      console.error('Erro:', erro);
+    }
+  };
 
   if (loading) {
     return (
@@ -50,6 +63,21 @@ export default function AlunoDashboardPage() {
     <>
       <Header />
       <div className="container" style={{ marginTop: '40px' }}>
+        {config.banner_url && (
+          <div style={{ marginBottom: '40px' }}>
+            <img
+              src={config.banner_url}
+              alt="Banner"
+              style={{
+                width: '100%',
+                height: '250px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+              }}
+            />
+          </div>
+        )}
+
         <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
 
         {trilhas.length === 0 ? (

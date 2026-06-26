@@ -38,6 +38,7 @@ export default function Header() {
                 <>
                   <Link href="/professor/dashboard">Dashboard</Link>
                   <Link href="/professor/alunos">Alunos</Link>
+                  <Link href="/professor/configuracoes">Configurações</Link>
                 </>
               )}
               {usuario.tipo === 'aluno' && (

@@ -11,6 +11,7 @@ import progressoRoutes from './routes/progresso.js';
 import inscricoesRoutes from './routes/inscricoes.js';
 import reordenarRoutes from './routes/reordenar.js';
 import alunosRoutes from './routes/alunos.js';
+import configuracoesRoutes from './routes/configuracoes.js';
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/progresso', progressoRoutes);
 app.use('/api/inscricoes', inscricoesRoutes);
 app.use('/api/reordenar', reordenarRoutes);
 app.use('/api/alunos', alunosRoutes);
+app.use('/api/configuracoes', configuracoesRoutes);
 
 // Servir arquivos de upload
 app.use('/uploads', express.static('uploads'));
