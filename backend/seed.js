@@ -11,13 +11,13 @@ async function seed() {
     // Senha: senha123
     const senhaHash = await bcrypt.hash('senha123', 10);
 
-    // Professor
+    // Professor - usuário principal
     await pool.query(
       'INSERT INTO users (email, senha_hash, nome, tipo) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
-      ['professor@teste.com', senhaHash, 'Professor Teste', 'professor']
+      ['yellowbrasildigital@gmail.com', senhaHash, 'Admin - AI Pro Academy', 'professor']
     );
 
-    // Aluno
+    // Aluno de teste
     await pool.query(
       'INSERT INTO users (email, senha_hash, nome, tipo) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
       ['aluno@teste.com', senhaHash, 'Aluno Teste', 'aluno']
