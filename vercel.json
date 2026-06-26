@@ -1,0 +1,15 @@
+{
+  "projectId": "prj_ai_pro_academy",
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/.next",
+  "env": {
+    "NEXT_PUBLIC_API_URL": {
+      "description": "URL do backend no Railway (será configurado no Vercel dashboard)"
+    }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
