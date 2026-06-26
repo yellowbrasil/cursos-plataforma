@@ -20,6 +20,9 @@ CREATE TABLE trilhas (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(255) NOT NULL,
   descricao TEXT,
+  sinopse VARCHAR(500),
+  imagem_url VARCHAR(500),
+  link_asaas VARCHAR(500),
   ordem INTEGER DEFAULT 1,
   criado_por_professor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -65,6 +68,8 @@ CREATE TABLE inscricoes (
   trilha_id INTEGER NOT NULL REFERENCES trilhas(id) ON DELETE CASCADE,
   data_inicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   data_conclusao TIMESTAMP,
+  bloqueado BOOLEAN DEFAULT FALSE,
+  data_desbloqueio TIMESTAMP,
   UNIQUE(aluno_id, trilha_id)
 );
 
@@ -79,6 +84,14 @@ CREATE TABLE progresso_licoes (
   UNIQUE(aluno_id, licao_id)
 );
 
+-- Tabela de configurações (chave-valor)
+CREATE TABLE configuracoes (
+  id SERIAL PRIMARY KEY,
+  chave VARCHAR(255) UNIQUE NOT NULL,
+  valor TEXT,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Índices para performance
 CREATE INDEX idx_trilhas_professor ON trilhas(criado_por_professor_id);
 CREATE INDEX idx_modulos_trilha ON modulos(trilha_id);
@@ -88,6 +101,7 @@ CREATE INDEX idx_inscricoes_aluno ON inscricoes(aluno_id);
 CREATE INDEX idx_inscricoes_trilha ON inscricoes(trilha_id);
 CREATE INDEX idx_progresso_aluno ON progresso_licoes(aluno_id);
 CREATE INDEX idx_progresso_licao ON progresso_licoes(licao_id);
+CREATE INDEX idx_configuracoes_chave ON configuracoes(chave);
 
 -- Dados de teste (opcional)
 -- INSERT INTO users (email, senha_hash, nome, tipo) VALUES

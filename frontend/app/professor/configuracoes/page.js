@@ -1,17 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Header from '@/components/Header';
 import ProfessorMenu from '@/components/ProfessorMenu';
 import Footer from '@/components/Footer';
 
-export default function ConfiguracoesPage() {
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get('tab') || 'banner';
-  const [abaAtiva, setAbaAtiva] = useState(tabParam);
-
+function ConfiguracoesContent() {
+  const [abaAtiva, setAbaAtiva] = useState('banner');
   const [aviso, setAviso] = useState('');
   const [banner, setBanner] = useState(null);
   const [previewBanner, setPreviewBanner] = useState('');
@@ -20,6 +17,7 @@ export default function ConfiguracoesPage() {
   const [mensagem, setMensagem] = useState('');
   const [token, setToken] = useState(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const t = localStorage.getItem('token');
@@ -29,11 +27,10 @@ export default function ConfiguracoesPage() {
     }
     setToken(t);
     fetchConfiguracoes();
-  }, [router]);
 
-  useEffect(() => {
-    setAbaAtiva(tabParam);
-  }, [tabParam]);
+    const tab = searchParams.get('tab') || 'banner';
+    setAbaAtiva(tab);
+  }, [router, searchParams]);
 
   const fetchConfiguracoes = async () => {
     try {
@@ -305,5 +302,13 @@ export default function ConfiguracoesPage() {
       </div>
       <Footer />
     </>
+  );
+}
+
+export default function ConfiguracoesPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', color: '#fff' }}>Carregando...</div>}>
+      <ConfiguracoesContent />
+    </Suspense>
   );
 }
