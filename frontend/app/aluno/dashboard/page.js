@@ -90,28 +90,36 @@ export default function AlunoDashboardPage() {
           <div>config object = {JSON.stringify(config)}</div>
         </div>
 
-        {config.banner_url ? (
+        {config.banner_url && (
           <div style={{ marginBottom: '40px' }}>
+            <div style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>
+              📍 Tentando carregar: {config.banner_url}
+            </div>
             <img
               src={config.banner_url}
-              alt="Banner"
+              alt="Banner Principal"
               style={{
                 width: '100%',
                 height: '250px',
                 objectFit: 'cover',
                 borderRadius: '8px',
                 border: '2px solid var(--primary)',
+                backgroundColor: '#1a1a1a',
               }}
               onError={(e) => {
-                console.error('❌ Erro ao carregar banner:', config.banner_url);
-                e.target.style.display = 'none';
+                console.error('❌ Erro ao carregar banner. Src:', e.target.src);
+                console.error('Status:', e.type);
+                e.target.style.border = '2px solid #ff6b6b';
               }}
-              onLoad={() => {
-                console.log('✅ Banner carregado:', config.banner_url);
+              onLoad={(e) => {
+                console.log('✅ Banner carregado com sucesso!');
+                e.target.style.border = '2px solid #51cf66';
               }}
             />
           </div>
-        ) : (
+        )}
+
+        {!config.banner_url && (
           <div style={{
             padding: '20px',
             backgroundColor: '#1a1a1a',
@@ -120,7 +128,7 @@ export default function AlunoDashboardPage() {
             borderLeft: '4px solid #ff6b6b',
             color: '#ff6b6b',
           }}>
-            ⚠️ BANNER NÃO ENCONTRADO (config.banner_url vazio)
+            ⚠️ BANNER NÃO ENCONTRADO
           </div>
         )}
 
