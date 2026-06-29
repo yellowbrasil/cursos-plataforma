@@ -10,7 +10,7 @@ router.get('/trilha/:trilha_id', verificarJWT, async (req, res) => {
     const { trilha_id } = req.params;
 
     const result = await pool.query(
-      'SELECT * FROM modulos WHERE trilha_id = $1 ORDER BY ordem ASC',
+      'SELECT * FROM modulos WHERE trilha_id = $1 AND ativo = TRUE ORDER BY ordem ASC',
       [trilha_id]
     );
 
@@ -85,6 +85,41 @@ router.put('/:id', verificarJWT, verificarProfessor, async (req, res) => {
   }
 });
 
-// Deletar módulo (professor)
+// Deletar módulo (professor) - Soft Delete
+router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const modulo = await pool.query('SELECT * FROM modulos WHERE id = $1', [id]);
+
+    if (modulo.rows.length === 0) {
+      return res.status(404).json({ erro: 'Módulo não encontrado' });
+    }
+
+    // Verificar se professor é dono da trilha
+    const trilha = await pool.query(
+      'SELECT * FROM trilhas WHERE id = $1 AND criado_por_professor_id = $2',
+      [modulo.rows[0].trilha_id, req.usuario_id]
+    );
+
+    if (trilha.rows.length === 0) {
+      return res.status(403).json({ erro: 'Acesso negado' });
+    }
+
+    // Soft delete - apenas marca como inativo
+    const result = await pool.query(
+      'UPDATE modulos SET ativo = FALSE WHERE id = $1 RETURNING id, nome',
+      [id]
+    );
+
+    res.json({
+      mensagem: 'Módulo removido com sucesso (soft delete)',
+      modulo: result.rows[0]
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao deletar módulo' });
+  }
+});
 
 export default router;

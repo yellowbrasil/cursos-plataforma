@@ -10,7 +10,7 @@ router.get('/modulo/:modulo_id', verificarJWT, async (req, res) => {
     const { modulo_id } = req.params;
 
     const result = await pool.query(
-      'SELECT * FROM licoes WHERE modulo_id = $1 ORDER BY ordem ASC',
+      'SELECT * FROM licoes WHERE modulo_id = $1 AND ativo = TRUE ORDER BY ordem ASC',
       [modulo_id]
     );
 
@@ -26,7 +26,7 @@ router.get('/:id', verificarJWT, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query('SELECT * FROM licoes WHERE id = $1', [id]);
+    const result = await pool.query('SELECT * FROM licoes WHERE id = $1 AND ativo = TRUE', [id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ erro: 'Lição não encontrada' });
@@ -114,6 +114,43 @@ router.put('/:id', verificarJWT, verificarProfessor, async (req, res) => {
   }
 });
 
-// Deletar lição (professor)
+// Deletar lição (professor) - Soft Delete
+router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const licao = await pool.query('SELECT * FROM licoes WHERE id = $1', [id]);
+
+    if (licao.rows.length === 0) {
+      return res.status(404).json({ erro: 'Lição não encontrada' });
+    }
+
+    // Verificar se professor é dono
+    const modulo = await pool.query(
+      `SELECT m.* FROM modulos m
+       INNER JOIN trilhas t ON m.trilha_id = t.id
+       WHERE m.id = $1 AND t.criado_por_professor_id = $2`,
+      [licao.rows[0].modulo_id, req.usuario_id]
+    );
+
+    if (modulo.rows.length === 0) {
+      return res.status(403).json({ erro: 'Acesso negado' });
+    }
+
+    // Soft delete - apenas marca como inativo
+    const result = await pool.query(
+      'UPDATE licoes SET ativo = FALSE WHERE id = $1 RETURNING id, nome',
+      [id]
+    );
+
+    res.json({
+      mensagem: 'Lição removida com sucesso (soft delete)',
+      licao: result.rows[0]
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao deletar lição' });
+  }
+});
 
 export default router;

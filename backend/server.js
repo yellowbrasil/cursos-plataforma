@@ -12,6 +12,7 @@ import inscricoesRoutes from './routes/inscricoes.js';
 import reordenarRoutes from './routes/reordenar.js';
 import alunosRoutes from './routes/alunos.js';
 import configuracoesRoutes from './routes/configuracoes.js';
+import adminAlunosRoutes from './routes/admin-alunos.js';
 
 dotenv.config();
 
@@ -62,6 +63,7 @@ app.use('/api/inscricoes', inscricoesRoutes);
 app.use('/api/reordenar', reordenarRoutes);
 app.use('/api/alunos', alunosRoutes);
 app.use('/api/configuracoes', configuracoesRoutes);
+app.use('/api/admin/alunos', adminAlunosRoutes);
 
 // Servir arquivos de upload
 app.use('/uploads', express.static('uploads'));

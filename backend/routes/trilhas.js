@@ -13,13 +13,13 @@ router.get('/', verificarJWT, async (req, res) => {
     let query, params;
 
     if (req.tipo_usuario === 'professor') {
-      query = 'SELECT * FROM trilhas WHERE criado_por_professor_id = $1 ORDER BY ordem ASC';
+      query = 'SELECT * FROM trilhas WHERE criado_por_professor_id = $1 AND ativo = TRUE ORDER BY ordem ASC';
       params = [req.usuario_id];
     } else {
       query = `
         SELECT t.* FROM trilhas t
         INNER JOIN inscricoes i ON t.id = i.trilha_id
-        WHERE i.aluno_id = $1 AND i.bloqueado = FALSE
+        WHERE i.aluno_id = $1 AND i.bloqueado = FALSE AND t.ativo = TRUE
         ORDER BY t.ordem ASC
       `;
       params = [req.usuario_id];
@@ -51,6 +51,7 @@ router.get('/com-status/todas', verificarJWT, async (req, res) => {
         END as status_inscricao
       FROM trilhas t
       LEFT JOIN inscricoes i ON t.id = i.trilha_id AND i.aluno_id = $1
+      WHERE t.ativo = TRUE
       ORDER BY t.ordem ASC
     `;
 
@@ -123,7 +124,36 @@ router.put('/:id', verificarJWT, verificarProfessor, uploadImagem.single('imagem
   }
 });
 
-// Deletar trilha (professor)
+// Deletar trilha (professor) - Soft Delete
+router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const trilha = await pool.query('SELECT * FROM trilhas WHERE id = $1', [id]);
+
+    if (trilha.rows.length === 0) {
+      return res.status(404).json({ erro: 'Trilha não encontrada' });
+    }
+
+    if (trilha.rows[0].criado_por_professor_id !== req.usuario_id) {
+      return res.status(403).json({ erro: 'Acesso negado' });
+    }
+
+    // Soft delete - apenas marca como inativo
+    const result = await pool.query(
+      'UPDATE trilhas SET ativo = FALSE WHERE id = $1 RETURNING id, nome',
+      [id]
+    );
+
+    res.json({
+      mensagem: 'Trilha removida com sucesso (soft delete)',
+      trilha: result.rows[0]
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao deletar trilha' });
+  }
+});
 
 // Get imagem da trilha (público)
 router.get('/:id/imagem', async (req, res) => {

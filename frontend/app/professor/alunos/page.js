@@ -8,13 +8,19 @@ import ProfessorMenu from '@/components/ProfessorMenu';
 import Footer from '@/components/Footer';
 
 export default function AlunosPage() {
-  const [trilhas, setTrilhas] = useState([]);
-  const [alunosCadastrados, setAlunosCadastrados] = useState([]);
-  const [trilhaSelecionada, setTrilhaSelecionada] = useState(null);
-  const [alunosSelecionados, setAlunosSelecionados] = useState([]);
-  const [alunosInscritos, setAlunosInscritos] = useState([]);
+  const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [busca, setBusca] = useState('');
+  const [showFormCriar, setShowFormCriar] = useState(false);
+  const [showFormEditar, setShowFormEditar] = useState(false);
+  const [alunoEditando, setAlunoEditando] = useState(null);
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    whatsapp: '',
+    senha: ''
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -24,121 +30,107 @@ export default function AlunosPage() {
       return;
     }
     setToken(t);
-    fetchTrilhas(t);
     fetchAlunos(t);
   }, [router]);
 
-  const fetchTrilhas = async (t) => {
+  const fetchAlunos = async (t, buscaTerms = '') => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas`,
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
-      setTrilhas(response.data);
+      const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/alunos`);
+      if (buscaTerms) {
+        url.searchParams.append('busca', buscaTerms);
+      }
+
+      const response = await axios.get(url.toString(), {
+        headers: { Authorization: `Bearer ${t}` }
+      });
+      setAlunos(response.data);
     } catch (erro) {
       console.error('Erro:', erro);
+      alert('Erro ao carregar alunos');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAlunos = async (t) => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/alunos`,
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
-      setAlunosCadastrados(response.data);
-    } catch (erro) {
-      console.error('Erro:', erro);
+  const handleBusca = (e) => {
+    const termo = e.target.value;
+    setBusca(termo);
+    if (termo.length > 0) {
+      fetchAlunos(token, termo);
+    } else {
+      fetchAlunos(token);
     }
   };
 
-  const fetchAlunosInscritos = async (trilhaId, t) => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/trilha/${trilhaId}`,
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
-      setAlunosInscritos(response.data);
-    } catch (erro) {
-      console.error('Erro:', erro);
-    }
-  };
+  const handleCriarAluno = async (e) => {
+    e.preventDefault();
 
-  const handleSelecionarTrilha = (trilhaId) => {
-    setTrilhaSelecionada(trilhaId);
-    setAlunosSelecionados([]);
-    fetchAlunosInscritos(trilhaId, token);
-  };
-
-  const handleInscreverAlunos = async () => {
-    if (alunosSelecionados.length === 0) {
-      alert('Selecione pelo menos um aluno');
+    if (!formData.nome || !formData.email || !formData.senha) {
+      alert('Nome, email e senha são obrigatórios');
       return;
     }
 
     try {
-      for (const alunoId of alunosSelecionados) {
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/inscrever`,
-          { aluno_id: alunoId, trilha_id: trilhaSelecionada },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-
-      alert('Alunos inscritos com sucesso!');
-      setAlunosSelecionados([]);
-      fetchAlunosInscritos(trilhaSelecionada);
-    } catch (erro) {
-      alert(erro.response?.data?.erro || 'Erro ao inscrever');
-    }
-  };
-
-  const handleBloquearAluno = async (inscricaoId) => {
-    try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/bloquear/${inscricaoId}`,
-        {},
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/alunos`,
+        {
+          nome: formData.nome,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          senha: formData.senha
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Aluno bloqueado!');
-      fetchAlunosInscritos(trilhaSelecionada);
+      alert('Aluno criado com sucesso!');
+      setFormData({ nome: '', email: '', whatsapp: '', senha: '' });
+      setShowFormCriar(false);
+      fetchAlunos(token, busca);
     } catch (erro) {
-      alert(erro.response?.data?.erro || 'Erro ao bloquear');
+      alert(erro.response?.data?.erro || 'Erro ao criar aluno');
     }
   };
 
-  const handleDesbloquearAluno = async (inscricaoId) => {
+  const handleToggleStatus = async (alunoId, alunoAtivo) => {
+    if (!window.confirm(`Tem certeza? Isso vai ${alunoAtivo ? 'desativar' : 'ativar'} o aluno.`)) {
+      return;
+    }
+
     try {
       await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/desbloquear/${inscricaoId}`,
-        {},
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/alunos/${alunoId}/status`,
+        { ativo: !alunoAtivo },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Aluno desbloqueado!');
-      fetchAlunosInscritos(trilhaSelecionada);
+      alert('Status atualizado com sucesso!');
+      fetchAlunos(token, busca);
     } catch (erro) {
-      alert(erro.response?.data?.erro || 'Erro ao desbloquear');
+      alert(erro.response?.data?.erro || 'Erro ao atualizar status');
     }
   };
 
-  const handleRemoverAluno = async (inscricaoId) => {
-    if (!window.confirm('Remover aluno dessa trilha?')) return;
+  const handleExcluir = async (alunoId) => {
+    if (!window.confirm('Tem certeza? Esta ação é irreversível (soft delete).')) {
+      return;
+    }
 
     try {
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/${inscricaoId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/alunos/${alunoId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert('Aluno removido!');
-      fetchAlunosInscritos(trilhaSelecionada);
+      alert('Aluno removido com sucesso!');
+      fetchAlunos(token, busca);
     } catch (erro) {
-      alert('Erro ao remover');
+      alert(erro.response?.data?.erro || 'Erro ao remover aluno');
     }
+  };
+
+  const handleEditarTrilhas = (aluno) => {
+    setAlunoEditando(aluno);
+    setShowFormEditar(true);
   };
 
   if (loading) {
@@ -153,10 +145,6 @@ export default function AlunosPage() {
     );
   }
 
-  const alunosNaoInscritos = alunosCadastrados.filter(
-    (aluno) => !alunosInscritos.some((a) => a.aluno_id === aluno.id)
-  );
-
   return (
     <>
       <Header />
@@ -166,188 +154,246 @@ export default function AlunosPage() {
           <span className="pulse" style={{ marginRight: '12px' }}></span>Gerenciar Alunos
         </h1>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-          {/* Coluna esquerda: Trilhas */}
-          <div>
-            <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--primary)' }}>
-              Suas Trilhas
-            </h2>
+        {/* Barra de ferramentas */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '30px', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Buscar por nome ou email..."
+            value={busca}
+            onChange={handleBusca}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: '1px solid var(--border)',
+              borderRadius: '4px',
+              fontSize: '14px'
+            }}
+          />
+          <button
+            onClick={() => setShowFormCriar(!showFormCriar)}
+            className="btn-primary"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {showFormCriar ? 'Cancelar' : '+ Novo Aluno'}
+          </button>
+        </div>
 
-            {trilhas.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>Nenhuma trilha criada.</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {trilhas.map((trilha) => (
-                  <button
-                    key={trilha.id}
-                    onClick={() => handleSelecionarTrilha(trilha.id)}
-                    className={trilhaSelecionada === trilha.id ? 'btn-primary' : 'btn-secondary'}
+        {/* Formulário de criação */}
+        {showFormCriar && (
+          <div
+            className="card"
+            style={{ marginBottom: '30px', padding: '20px', borderLeft: '4px solid var(--primary)' }}
+          >
+            <h2 style={{ fontSize: '18px', marginTop: 0, marginBottom: '20px' }}>Criar Novo Aluno</h2>
+            <form onSubmit={handleCriarAluno}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>
+                    Nome *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                     style={{
-                      textAlign: 'left',
-                      padding: '12px',
-                      fontWeight: trilhaSelecionada === trilha.id ? '600' : '400',
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>
+                    WhatsApp
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.whatsapp}
+                    onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                    placeholder="+55 11 99999-9999"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px' }}>
+                    Senha (mín. 8 caracteres) *
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.senha}
+                    onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-primary">
+                Criar Aluno
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Tabela de alunos */}
+        <div className="card" style={{ overflowX: 'auto' }}>
+          <h2 style={{ fontSize: '18px', marginTop: 0, marginBottom: '20px' }}>
+            Alunos Cadastrados ({alunos.length})
+          </h2>
+
+          {alunos.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '20px' }}>
+              Nenhum aluno encontrado.
+            </p>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                  <th style={{ textAlign: 'left', padding: '12px', fontSize: '13px', fontWeight: '600' }}>
+                    Nome
+                  </th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontSize: '13px', fontWeight: '600' }}>
+                    Email
+                  </th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontSize: '13px', fontWeight: '600' }}>
+                    WhatsApp
+                  </th>
+                  <th style={{ textAlign: 'center', padding: '12px', fontSize: '13px', fontWeight: '600' }}>
+                    Status
+                  </th>
+                  <th style={{ textAlign: 'center', padding: '12px', fontSize: '13px', fontWeight: '600' }}>
+                    Trilhas
+                  </th>
+                  <th style={{ textAlign: 'center', padding: '12px', fontSize: '13px', fontWeight: '600' }}>
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {alunos.map((aluno) => (
+                  <tr
+                    key={aluno.id}
+                    style={{
+                      borderBottom: '1px solid var(--border)',
+                      opacity: aluno.ativo ? 1 : 0.6
                     }}
                   >
-                    {trilha.nome}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Coluna direita: Alunos */}
-          {trilhaSelecionada && (
-            <div>
-              <h2 style={{ fontSize: '18px', marginBottom: '20px', color: 'var(--primary)' }}>
-                Alunos da Trilha
-              </h2>
-
-              {/* Alunos inscritos */}
-              <div style={{ marginBottom: '30px' }}>
-                <h3 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--primary)' }}>
-                  Inscritos ({alunosInscritos.length})
-                </h3>
-
-                {alunosInscritos.length === 0 ? (
-                  <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Nenhum aluno inscrito.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {alunosInscritos.map((inscricao) => (
-                      <div
-                        key={inscricao.id}
-                        className="card"
+                    <td style={{ padding: '12px', fontSize: '14px' }}>
+                      <strong>{aluno.nome}</strong>
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '14px', color: 'var(--text-muted)' }}>
+                      {aluno.email}
+                    </td>
+                    <td style={{ padding: '12px', fontSize: '14px', color: 'var(--text-muted)' }}>
+                      {aluno.whatsapp || '-'}
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <span
                         style={{
-                          padding: '10px',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          opacity: inscricao.bloqueado ? 0.6 : 1,
+                          display: 'inline-block',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          backgroundColor: aluno.ativo ? '#d3f9d8' : '#ffe0e0',
+                          color: aluno.ativo ? '#2b8a3e' : '#c92a2a'
                         }}
                       >
-                        <div>
-                          <p style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 2px 0' }}>
-                            {inscricao.nome}
-                          </p>
-                          <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>
-                            {inscricao.email}
-                          </p>
-                          {inscricao.bloqueado && (
-                            <p style={{ fontSize: '11px', color: '#ff6b6b', margin: '2px 0 0 0' }}>
-                              Bloqueado
-                            </p>
-                          )}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {inscricao.bloqueado ? (
-                            <button
-                              onClick={() => handleDesbloquearAluno(inscricao.id)}
-                              style={{
-                                padding: '4px 8px',
-                                fontSize: '11px',
-                                backgroundColor: '#51cf66',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              Desbloquear
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleBloquearAluno(inscricao.id)}
-                              style={{
-                                padding: '4px 8px',
-                                fontSize: '11px',
-                                backgroundColor: '#ff6b6b',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              Bloquear
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => handleRemoverAluno(inscricao.id)}
-                            style={{
-                              padding: '4px 8px',
-                              fontSize: '11px',
-                              backgroundColor: 'var(--border)',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Remover
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Alunos não inscritos */}
-              <div>
-                <h3 style={{ fontSize: '14px', marginBottom: '12px', color: 'var(--primary)' }}>
-                  Adicionar Alunos ({alunosNaoInscritos.length})
-                </h3>
-
-                {alunosNaoInscritos.length === 0 ? (
-                  <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-                    Todos os alunos estão inscritos.
-                  </p>
-                ) : (
-                  <div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
-                      {alunosNaoInscritos.map((aluno) => (
-                        <label
-                          key={aluno.id}
+                        {aluno.ativo ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px' }}>
+                      {aluno.trilhas_ativas}/{aluno.total_trilhas}
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => handleEditarTrilhas(aluno)}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '8px',
-                            backgroundColor: 'var(--bg-card)',
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            backgroundColor: '#4c6ef5',
+                            color: 'white',
+                            border: 'none',
                             borderRadius: '4px',
-                            cursor: 'pointer',
+                            cursor: 'pointer'
                           }}
                         >
-                          <input
-                            type="checkbox"
-                            checked={alunosSelecionados.includes(aluno.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setAlunosSelecionados([...alunosSelecionados, aluno.id]);
-                              } else {
-                                setAlunosSelecionados(alunosSelecionados.filter((id) => id !== aluno.id));
-                              }
-                            }}
-                          />
-                          <div style={{ fontSize: '12px' }}>
-                            <p style={{ margin: 0, fontWeight: '600' }}>{aluno.nome}</p>
-                            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-muted)' }}>
-                              {aluno.email}
-                            </p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
+                          Editar
+                        </button>
 
-                    <button
-                      onClick={handleInscreverAlunos}
-                      className="btn-primary"
-                      style={{ width: '100%' }}
-                      disabled={alunosSelecionados.length === 0}
-                    >
-                      Inscrever Selecionados ({alunosSelecionados.length})
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+                        <button
+                          onClick={() => handleToggleStatus(aluno.id, aluno.ativo)}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            backgroundColor: aluno.ativo ? '#ff6b6b' : '#51cf66',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {aluno.ativo ? 'Bloquear' : 'Ativar'}
+                        </button>
+
+                        <button
+                          onClick={() => handleExcluir(aluno.id)}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            backgroundColor: '#868e96',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>

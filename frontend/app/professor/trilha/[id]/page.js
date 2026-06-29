@@ -93,6 +93,23 @@ export default function GerenciarTrilhaPage() {
     }
   };
 
+  const handleDeletarModulo = async (moduloId) => {
+    if (!window.confirm('Tem certeza que deseja deletar este módulo?')) return;
+
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/modulos/${moduloId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setModulos(modulos.filter((m) => m.id !== moduloId));
+      const novoMapa = { ...licoesMap };
+      delete novoMapa[moduloId];
+      setLicoesMap(novoMapa);
+    } catch (erro) {
+      alert(erro.response?.data?.erro || 'Erro ao deletar módulo');
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -156,6 +173,7 @@ export default function GerenciarTrilhaPage() {
                 token={token}
                 onRefresh={fetchModulos}
                 onReordenar={handleReordenarModulo}
+                onDeletar={handleDeletarModulo}
               />
             ))}
           </div>
@@ -166,7 +184,7 @@ export default function GerenciarTrilhaPage() {
   );
 }
 
-function ModuloCard({ modulo, index, totalModulos, licoes, token, onRefresh, onReordenar }) {
+function ModuloCard({ modulo, index, totalModulos, licoes, token, onRefresh, onReordenar, onDeletar }) {
   const [novaLicaoNome, setNovaLicaoNome] = useState('');
   const [novaLicaoVideo, setNovaLicaoVideo] = useState('');
   const [showFormLicao, setShowFormLicao] = useState(false);
@@ -265,6 +283,20 @@ function ModuloCard({ modulo, index, totalModulos, licoes, token, onRefresh, onR
     }
   };
 
+  const handleDeletarLicao = async (licaoId) => {
+    if (!window.confirm('Tem certeza que deseja deletar esta lição?')) return;
+
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/licoes/${licaoId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      onRefresh();
+    } catch (erro) {
+      alert(erro.response?.data?.erro || 'Erro ao deletar lição');
+    }
+  };
+
   return (
     <div className="card" style={{ marginBottom: '20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
@@ -286,6 +318,13 @@ function ModuloCard({ modulo, index, totalModulos, licoes, token, onRefresh, onR
             className="btn-sm"
           >
             Baixo
+          </button>
+          <button
+            onClick={() => onDeletar(modulo.id)}
+            className="btn-sm"
+            style={{ backgroundColor: '#ff6b6b', color: 'white' }}
+          >
+            Deletar
           </button>
         </div>
       </div>
@@ -360,6 +399,13 @@ function ModuloCard({ modulo, index, totalModulos, licoes, token, onRefresh, onR
                     className="btn-sm"
                   >
                     Arquivos
+                  </button>
+                  <button
+                    onClick={() => handleDeletarLicao(licao.id)}
+                    className="btn-sm"
+                    style={{ backgroundColor: '#ff6b6b', color: 'white' }}
+                  >
+                    Deletar
                   </button>
                 </div>
               </div>
