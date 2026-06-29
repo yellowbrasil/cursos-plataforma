@@ -58,7 +58,7 @@ export default function HomePage() {
           <p
             style={{
               fontSize: '18px',
-              color: 'var(--text-muted)',
+              color: '#cccccc',
               marginBottom: '15px',
               lineHeight: '1.6'
             }}
