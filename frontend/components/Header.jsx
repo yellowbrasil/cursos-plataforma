@@ -47,9 +47,12 @@ export default function Header() {
                 <>
                   <Link href="/aluno/dashboard">Minhas Trilhas</Link>
                   <Link href="/aluno/explorar">Explorar</Link>
+                  <Link href="/aluno/perfil">Perfil</Link>
                 </>
               )}
-              {!isProfessor && <Link href="/perfil">Perfil</Link>}
+              {!isProfessor && usuario.tipo === 'professor' && (
+                <Link href="/perfil">Perfil</Link>
+              )}
               <button
                 onClick={handleLogout}
                 style={{

@@ -100,7 +100,7 @@ router.put('/mudar-senha', verificarJWT, async (req, res) => {
 router.get('/perfil', verificarJWT, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, email, nome, tipo FROM users WHERE id = $1',
+      'SELECT id, email, nome, tipo, whatsapp FROM users WHERE id = $1',
       [req.usuario_id]
     );
 
@@ -112,6 +112,52 @@ router.get('/perfil', verificarJWT, async (req, res) => {
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao buscar perfil' });
+  }
+});
+
+// Update Perfil
+router.put('/perfil', verificarJWT, async (req, res) => {
+  try {
+    const { nome, email, whatsapp } = req.body;
+    const usuario_id = req.usuario_id;
+
+    if (!nome || !email) {
+      return res.status(400).json({ erro: 'Nome e email são obrigatórios' });
+    }
+
+    // Validar email
+    if (!email.includes('@')) {
+      return res.status(400).json({ erro: 'Email inválido' });
+    }
+
+    // Validar WhatsApp (apenas números e +)
+    if (whatsapp && !/^\+?[0-9\s()-]+$/.test(whatsapp)) {
+      return res.status(400).json({ erro: 'WhatsApp inválido' });
+    }
+
+    // Verificar se email já existe (em outro usuário)
+    const emailCheck = await pool.query(
+      'SELECT id FROM users WHERE email = $1 AND id != $2',
+      [email, usuario_id]
+    );
+
+    if (emailCheck.rows.length > 0) {
+      return res.status(400).json({ erro: 'Email já utilizado por outro usuário' });
+    }
+
+    // Atualizar usuário
+    const result = await pool.query(
+      'UPDATE users SET nome = $1, email = $2, whatsapp = $3 WHERE id = $4 RETURNING id, email, nome, tipo, whatsapp',
+      [nome, email, whatsapp || null, usuario_id]
+    );
+
+    res.json({
+      mensagem: 'Perfil atualizado com sucesso',
+      usuario: result.rows[0]
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao atualizar perfil' });
   }
 });
 
