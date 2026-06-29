@@ -56,6 +56,35 @@ export default function ProfessorMenu() {
         </div>
       </Link>
 
+      {/* Criar Trilha */}
+      <Link href="/professor/dashboard?criar=true">
+        <div style={{
+          padding: '12px 20px',
+          color: '#fff',
+          cursor: 'pointer',
+          fontSize: '16px',
+          transition: 'all 0.3s',
+          borderLeft: '4px solid transparent',
+          paddingLeft: '16px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#ff7722';
+          e.currentTarget.style.fontWeight = '600';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+          e.currentTarget.style.fontWeight = '500';
+        }}
+        >
+          <span className="pulse" style={{ width: '8px', height: '8px' }}></span>
+          ➕ Criar Trilha
+        </div>
+      </Link>
+
       {/* Alunos */}
       <Link href="/professor/alunos">
         <div style={{
