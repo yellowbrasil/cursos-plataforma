@@ -14,18 +14,21 @@ export default function GerenciarTrilhaPage() {
   const [showFormModulo, setShowFormModulo] = useState(false);
   const [expandedModulo, setExpandedModulo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
   const router = useRouter();
   const params = useParams();
 
-  const token = localStorage.getItem('token');
-
   useEffect(() => {
-    if (!token) {
+    const t = localStorage.getItem('token');
+    if (!t) {
       router.push('/login');
       return;
     }
+    setToken(t);
+  }, [router]);
 
-    if (!params.id) {
+  useEffect(() => {
+    if (!token || !params.id) {
       return;
     }
 
