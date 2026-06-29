@@ -27,10 +27,10 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:3002',
-    'https://ai-pro-academy-prod.vercel.app'
+    'http://69.62.93.231'
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 86400
 }));
