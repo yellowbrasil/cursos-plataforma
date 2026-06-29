@@ -35,20 +35,14 @@ router.get('/banner/download', async (req, res) => {
     const caminhoRelativo = bannerUrl.replace('/uploads/', '');
     const caminhoCompleto = path.resolve('./uploads', caminhoRelativo);
 
-    console.log('Servindo banner:', caminhoCompleto);
-
     // Verificar se arquivo existe
     if (!fs.existsSync(caminhoCompleto)) {
-      console.error('Arquivo não encontrado:', caminhoCompleto);
       return res.status(404).json({ erro: 'Banner não encontrado' });
     }
 
     // Enviar arquivo com headers corretos
-    res.sendFile(caminhoCompleto, (err) => {
-      if (err) console.error('Erro ao enviar arquivo:', err);
-    });
+    res.sendFile(caminhoCompleto);
   } catch (erro) {
-    console.error('Erro ao servir banner:', erro);
     res.status(500).json({ erro: 'Erro ao servir banner' });
   }
 });

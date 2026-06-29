@@ -45,17 +45,12 @@ export default function AlunoDashboardPage() {
 
   const fetchConfiguracoes = async () => {
     try {
-      console.log('Buscando configurações de:', `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`);
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`
       );
-      console.log('Configurações recebidas:', response.data);
       setConfig(response.data);
-      if (response.data.banner_url) {
-        console.log('Banner URL encontrada:', response.data.banner_url);
-      }
     } catch (erro) {
-      console.error('Erro ao buscar configurações:', erro);
+      // Erro silencioso - não é crítico se configurações não carregarem
     }
   };
 
