@@ -134,7 +134,7 @@ Antes: app.use(cors());  // ← Aberto ao mundo
 
 Depois:
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3002', 'https://ai-pro-academy-prod.vercel.app'],
+  origin: ['http://localhost:3000', 'http://localhost:3002'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
