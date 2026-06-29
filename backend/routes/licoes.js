@@ -10,7 +10,7 @@ router.get('/modulo/:modulo_id', verificarJWT, async (req, res) => {
     const { modulo_id } = req.params;
 
     const result = await pool.query(
-      'SELECT * FROM licoes WHERE modulo_id = $1 AND ativo = TRUE ORDER BY ordem ASC',
+      'SELECT * FROM licoes WHERE modulo_id = $1 AND ativo = TRUE AND deletado_pelo_usuario = FALSE ORDER BY ordem ASC',
       [modulo_id]
     );
 
@@ -26,7 +26,7 @@ router.get('/:id', verificarJWT, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query('SELECT * FROM licoes WHERE id = $1 AND ativo = TRUE', [id]);
+    const result = await pool.query('SELECT * FROM licoes WHERE id = $1 AND ativo = TRUE AND deletado_pelo_usuario = FALSE', [id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ erro: 'Lição não encontrada' });
@@ -137,14 +137,14 @@ router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
       return res.status(403).json({ erro: 'Acesso negado' });
     }
 
-    // Soft delete - apenas marca como inativo
+    // Soft delete - marca como inativo E deletado pelo usuário
     const result = await pool.query(
-      'UPDATE licoes SET ativo = FALSE WHERE id = $1 RETURNING id, nome',
+      'UPDATE licoes SET ativo = FALSE, deletado_pelo_usuario = TRUE WHERE id = $1 RETURNING id, nome',
       [id]
     );
 
     res.json({
-      mensagem: 'Lição removida com sucesso (soft delete)',
+      mensagem: 'Lição removida com sucesso',
       licao: result.rows[0]
     });
   } catch (erro) {

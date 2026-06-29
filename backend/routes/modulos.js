@@ -10,7 +10,7 @@ router.get('/trilha/:trilha_id', verificarJWT, async (req, res) => {
     const { trilha_id } = req.params;
 
     const result = await pool.query(
-      'SELECT * FROM modulos WHERE trilha_id = $1 AND ativo = TRUE ORDER BY ordem ASC',
+      'SELECT * FROM modulos WHERE trilha_id = $1 AND ativo = TRUE AND deletado_pelo_usuario = FALSE ORDER BY ordem ASC',
       [trilha_id]
     );
 
@@ -106,14 +106,14 @@ router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
       return res.status(403).json({ erro: 'Acesso negado' });
     }
 
-    // Soft delete - apenas marca como inativo
+    // Soft delete - marca como inativo E deletado pelo usuário
     const result = await pool.query(
-      'UPDATE modulos SET ativo = FALSE WHERE id = $1 RETURNING id, nome',
+      'UPDATE modulos SET ativo = FALSE, deletado_pelo_usuario = TRUE WHERE id = $1 RETURNING id, nome',
       [id]
     );
 
     res.json({
-      mensagem: 'Módulo removido com sucesso (soft delete)',
+      mensagem: 'Módulo removido com sucesso',
       modulo: result.rows[0]
     });
   } catch (erro) {

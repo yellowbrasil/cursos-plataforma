@@ -13,13 +13,13 @@ router.get('/', verificarJWT, async (req, res) => {
     let query, params;
 
     if (req.tipo_usuario === 'professor') {
-      query = 'SELECT * FROM trilhas WHERE criado_por_professor_id = $1 AND ativo = TRUE ORDER BY ordem ASC';
+      query = 'SELECT * FROM trilhas WHERE criado_por_professor_id = $1 AND ativo = TRUE AND deletado_pelo_usuario = FALSE ORDER BY ordem ASC';
       params = [req.usuario_id];
     } else {
       query = `
         SELECT t.* FROM trilhas t
         INNER JOIN inscricoes i ON t.id = i.trilha_id
-        WHERE i.aluno_id = $1 AND i.bloqueado = FALSE AND t.ativo = TRUE
+        WHERE i.aluno_id = $1 AND i.bloqueado = FALSE AND t.ativo = TRUE AND t.deletado_pelo_usuario = FALSE
         ORDER BY t.ordem ASC
       `;
       params = [req.usuario_id];
@@ -51,7 +51,7 @@ router.get('/com-status/todas', verificarJWT, async (req, res) => {
         END as status_inscricao
       FROM trilhas t
       LEFT JOIN inscricoes i ON t.id = i.trilha_id AND i.aluno_id = $1
-      WHERE t.ativo = TRUE
+      WHERE t.ativo = TRUE AND t.deletado_pelo_usuario = FALSE
       ORDER BY t.ordem ASC
     `;
 
@@ -139,14 +139,14 @@ router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
       return res.status(403).json({ erro: 'Acesso negado' });
     }
 
-    // Soft delete - apenas marca como inativo
+    // Soft delete - marca como inativo E deletado pelo usuário
     const result = await pool.query(
-      'UPDATE trilhas SET ativo = FALSE WHERE id = $1 RETURNING id, nome',
+      'UPDATE trilhas SET ativo = FALSE, deletado_pelo_usuario = TRUE WHERE id = $1 RETURNING id, nome',
       [id]
     );
 
     res.json({
-      mensagem: 'Trilha removida com sucesso (soft delete)',
+      mensagem: 'Trilha removida com sucesso',
       trilha: result.rows[0]
     });
   } catch (erro) {
