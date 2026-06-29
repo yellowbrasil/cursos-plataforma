@@ -20,7 +20,7 @@ Foi implementado um **sistema completo de gerenciamento de alunos e CRUD de cont
 Acesse o Supabase Console (SQL Editor) ou use `psql`:
 
 ```bash
-psql -h seu-host.supabase.co -U postgres -d seu-db
+psql -h localhost -U postgres -d seu-db
 ```
 
 ### 1.2 Executar a Migration 1 (Soft Delete)
@@ -360,7 +360,7 @@ curl http://localhost:3001/api/trilhas \
   -H "Authorization: Bearer $TOKEN"
 
 # Verificar no banco que dados ainda existem
-psql -h seu-host.supabase.co -d seu-db -c "SELECT id, nome, ativo FROM trilhas WHERE id = 1;"
+psql -h localhost -d seu-db -c "SELECT id, nome, ativo FROM trilhas WHERE id = 1;"
 
 # Resultado esperado:
 # - Trilha deletada não aparece em SELECT * (porque há filtro ativo = true)

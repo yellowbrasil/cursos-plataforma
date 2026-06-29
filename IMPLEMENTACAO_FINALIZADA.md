@@ -70,7 +70,7 @@ Abra o **Supabase SQL Editor** ou use `psql`:
 
 ```bash
 # Opção 1: Via Supabase Console
-# https://app.supabase.com → SQL Editor → Copie e execute:
+# PostgreSQL local em localhost:5432 → SQL Editor → Copie e execute:
 
 -- Migration 1: Soft Delete
 ALTER TABLE trilhas ADD COLUMN IF NOT EXISTS ativo BOOLEAN DEFAULT TRUE;

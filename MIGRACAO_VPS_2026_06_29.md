@@ -25,7 +25,7 @@ Dados migrados: **11 registros** em **8 tabelas** (3 usuários, 2 trilhas, 1 mó
 
 1. **Credenciais Supabase Identificadas**
    - Project ID: `tkycshgylushbmxmyvul`
-   - Database: `postgres` @ `db.tkycshgylushbmxmyvul.supabase.co:5432`
+   - Database: `postgres` @ `localhost:5432`
    - User: `postgres`
 
 2. **Snapshots Criados**
@@ -202,7 +202,7 @@ DB_PORT=5432
 | Componente | User | Host | Port | Database | Password |
 |-----------|------|------|------|----------|----------|
 | VPS PostgreSQL | `cursos` | `69.62.93.231` | 5432 | `cursos_academy` | `L0k@l_C3Ql7d@P@ssW0rd2024_SECURE!` |
-| Supabase (Backup) | `postgres` | `db.tkycshgylushbmxmyvul.supabase.co` | 5432 | `postgres` | `F024151f@#$` |
+| PostgreSQL Local (Backup) | `postgres` | `localhost` | 5432 | `postgres` | `F024151f@#$` |
 
 > ⚠️ NUNCA comitar credenciais em repositório. Usar `.env` com `.gitignore`.
 
@@ -215,7 +215,7 @@ Se algo der errado, você pode:
 1. **Voltar ao Supabase original:**
    ```bash
    # Editar backend/.env
-   DB_HOST=db.tkycshgylushbmxmyvul.supabase.co
+   DB_HOST=localhost
    DB_USER=postgres
    DB_NAME=postgres
    DB_PASSWORD=F024151f@#$
