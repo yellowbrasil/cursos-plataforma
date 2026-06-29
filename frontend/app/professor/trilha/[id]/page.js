@@ -25,11 +25,17 @@ export default function GerenciarTrilhaPage() {
       return;
     }
 
+    if (!params.id) {
+      return;
+    }
+
     fetchModulos();
-  }, [token]);
+  }, [token, params.id]);
 
   const fetchModulos = async () => {
     try {
+      if (!params.id) return;
+
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/modulos/trilha/${params.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -47,7 +53,7 @@ export default function GerenciarTrilhaPage() {
       }
       setLicoesMap(mapaLicoes);
     } catch (erro) {
-      console.error('Erro:', erro);
+      console.error('Erro ao buscar módulos:', erro);
     } finally {
       setLoading(false);
     }
