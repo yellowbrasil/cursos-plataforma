@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Header from '@/components/Header';
 import ProfessorMenu from '@/components/ProfessorMenu';
@@ -19,7 +19,6 @@ export default function ProfessorDashboardPage() {
   const [erro, setErro] = useState('');
   const [token, setToken] = useState(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const t = localStorage.getItem('token');
@@ -31,12 +30,13 @@ export default function ProfessorDashboardPage() {
     fetchTrilhas(t);
 
     // Abrir formulário automaticamente se param ?criar=true
-    if (searchParams.get('criar') === 'true') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('criar') === 'true') {
       setShowForm(true);
       // Limpar a query string
-      router.replace('/professor/dashboard');
+      window.history.replaceState({}, document.title, '/professor/dashboard');
     }
-  }, [router, searchParams]);
+  }, [router]);
 
   const fetchTrilhas = async (t) => {
     try {
