@@ -148,28 +148,5 @@ router.get('/trilha/:trilha_id', verificarJWT, verificarProfessor, async (req, r
 });
 
 // Remover inscrição
-router.delete('/:inscricao_id', verificarJWT, verificarProfessor, async (req, res) => {
-  try {
-    const { inscricao_id } = req.params;
-
-    const inscricaoResult = await pool.query(
-      `SELECT i.* FROM inscricoes i
-       INNER JOIN trilhas t ON i.trilha_id = t.id
-       WHERE i.id = $1 AND t.criado_por_professor_id = $2`,
-      [inscricao_id, req.usuario_id]
-    );
-
-    if (inscricaoResult.rows.length === 0) {
-      return res.status(403).json({ erro: 'Inscrição não encontrada' });
-    }
-
-    await pool.query('DELETE FROM inscricoes WHERE id = $1', [inscricao_id]);
-
-    res.json({ mensagem: 'Aluno removido da trilha' });
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ erro: 'Erro ao remover aluno' });
-  }
-});
 
 export default router;

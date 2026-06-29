@@ -115,35 +115,5 @@ router.put('/:id', verificarJWT, verificarProfessor, async (req, res) => {
 });
 
 // Deletar lição (professor)
-router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const licao = await pool.query('SELECT * FROM licoes WHERE id = $1', [id]);
-
-    if (licao.rows.length === 0) {
-      return res.status(404).json({ erro: 'Lição não encontrada' });
-    }
-
-    // Verificar se professor é dono
-    const modulo = await pool.query(
-      `SELECT m.* FROM modulos m
-       INNER JOIN trilhas t ON m.trilha_id = t.id
-       WHERE m.id = $1 AND t.criado_por_professor_id = $2`,
-      [licao.rows[0].modulo_id, req.usuario_id]
-    );
-
-    if (modulo.rows.length === 0) {
-      return res.status(403).json({ erro: 'Acesso negado' });
-    }
-
-    await pool.query('DELETE FROM licoes WHERE id = $1', [id]);
-
-    res.json({ mensagem: 'Lição deletada com sucesso' });
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ erro: 'Erro ao deletar lição' });
-  }
-});
 
 export default router;

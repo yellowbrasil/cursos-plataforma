@@ -86,32 +86,5 @@ router.put('/:id', verificarJWT, verificarProfessor, async (req, res) => {
 });
 
 // Deletar módulo (professor)
-router.delete('/:id', verificarJWT, verificarProfessor, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const modulo = await pool.query('SELECT * FROM modulos WHERE id = $1', [id]);
-
-    if (modulo.rows.length === 0) {
-      return res.status(404).json({ erro: 'Módulo não encontrado' });
-    }
-
-    const trilha = await pool.query(
-      'SELECT * FROM trilhas WHERE id = $1 AND criado_por_professor_id = $2',
-      [modulo.rows[0].trilha_id, req.usuario_id]
-    );
-
-    if (trilha.rows.length === 0) {
-      return res.status(403).json({ erro: 'Acesso negado' });
-    }
-
-    await pool.query('DELETE FROM modulos WHERE id = $1', [id]);
-
-    res.json({ mensagem: 'Módulo deletado com sucesso' });
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ erro: 'Erro ao deletar módulo' });
-  }
-});
 
 export default router;

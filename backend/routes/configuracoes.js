@@ -76,31 +76,14 @@ router.put('/', verificarJWT, verificarProfessor, uploadImagem.single('banner'),
 
     // Atualizar banner se arquivo foi enviado
     if (req.file) {
-      // Buscar banner antigo para deletar
-      const bannerAntigo = await pool.query(
-        'SELECT valor FROM configuracoes WHERE chave = $1',
-        ['banner_url']
-      );
-
-      // Deletar arquivo antigo se existir
-      if (bannerAntigo.rows.length > 0 && bannerAntigo.rows[0].valor) {
-        const caminhoAntigo = path.join('./uploads', bannerAntigo.rows[0].valor.replace('/uploads/', ''));
-        try {
-          if (fs.existsSync(caminhoAntigo)) {
-            fs.unlinkSync(caminhoAntigo);
-            console.log('Banner antigo deletado:', caminhoAntigo);
-          }
-        } catch (erroDelete) {
-          console.error('Erro ao deletar banner antigo:', erroDelete);
-        }
-      }
-
-      // Salvar novo banner
+      // PROTEÇÃO: Nunca deletar dados - apenas guardar novo banner
+      // Arquivo antigo é preservado no disco por segurança
       const banner_url = `/uploads/imagens/${req.file.filename}`;
       await pool.query(
         'UPDATE configuracoes SET valor = $1, atualizado_em = NOW() WHERE chave = $2',
         [banner_url, 'banner_url']
       );
+      console.log('Banner atualizado (preservando arquivo antigo):', banner_url);
     }
 
     // Retornar configurações atualizadas
