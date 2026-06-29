@@ -51,7 +51,7 @@ export default function HomePage() {
             }}></div>
           </div>
 
-          <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>
+          <h1 style={{ fontSize: '48px', marginBottom: '20px', color: '#f65601' }}>
             AI PRO ACADEMY
           </h1>
 
