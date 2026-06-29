@@ -1,18 +1,17 @@
-import jwt from 'jsonwebtoken';
+// ⚠️ JWT NO FRONTEND NUNCA DEVE VALIDAR A ASSINATURA
+// Apenas decodificamos para ler claims, mas confiamos no servidor para validação
 
-const JWT_SECRET = process.env.JWT_SECRET || 'desenvolvimento_seguro_2026_fabio_schneider_cursos';
-
-export const verificarJWT = (req) => {
-  const token = req.headers.authorization?.split(' ')[1];
+export const decodeToken = (token) => {
   if (!token) return null;
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const decoded = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    return decoded;
   } catch {
     return null;
   }
 };
-
-export const sign = (payload) => jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
 export const verificarProfessor = (decoded) => decoded?.tipo === 'professor' || decoded?.tipo === 'admin';
 export const verificarAluno = (decoded) => decoded?.tipo === 'aluno';

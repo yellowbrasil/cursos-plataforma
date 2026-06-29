@@ -7,8 +7,13 @@ export const verificarJWT = (req, res, next) => {
     return res.status(401).json({ erro: 'Token não fornecido' });
   }
 
+  if (!process.env.JWT_SECRET) {
+    console.error('ERRO CRÍTICO: JWT_SECRET não está definido!');
+    return res.status(500).json({ erro: 'Erro na configuração do servidor' });
+  }
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'desenvolvimento_seguro_2026_fabio_schneider_cursos');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.usuario_id = decoded.usuario_id;
     req.tipo_usuario = decoded.tipo;
     next();
