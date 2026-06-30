@@ -17,7 +17,6 @@ export default function AlunosPage() {
   const [showFormEditar, setShowFormEditar] = useState(false);
   const [alunoEditando, setAlunoEditando] = useState(null);
   const [trilhasAluno, setTrilhasAluno] = useState([]);
-  const [trilhasOriginais, setTrilhasOriginais] = useState([]);
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -114,13 +113,10 @@ export default function AlunosPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/trilha/${aluno.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const trilhasIds = response.data.map(t => t.id);
-      setTrilhasAluno(trilhasIds);
-      setTrilhasOriginais(trilhasIds);
+      setTrilhasAluno(response.data.map(t => t.id));
     } catch (erro) {
       console.error('Erro:', erro);
       setTrilhasAluno([]);
-      setTrilhasOriginais([]);
     }
     setShowFormEditar(true);
   };
@@ -129,47 +125,21 @@ export default function AlunosPage() {
     if (!alunoEditando) return;
 
     try {
-      // Trilhas a remover (estavam antes e agora não estão selecionadas)
-      const aRemover = trilhasOriginais.filter(id => !trilhasAluno.includes(id));
-
-      // Trilhas a adicionar (não estavam antes e agora estão selecionadas)
-      const aAdicionar = trilhasAluno.filter(id => !trilhasOriginais.includes(id));
-
-      // Remover inscrições
-      for (const trilhaId of aRemover) {
-        try {
-          await axios.delete(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/inscricoes/aluno/${alunoEditando.id}/trilha/${trilhaId}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-        } catch (erro) {
-          console.error('Erro ao remover trilha:', erro);
-        }
-      }
-
-      // Adicionar inscrições
-      for (const trilhaId of aAdicionar) {
-        try {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/inscrever`,
-            { aluno_id: alunoEditando.id, trilha_id: trilhaId },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-        } catch (erro) {
-          if (erro.response?.status !== 400) { // Ignorar "já inscrito"
-            console.error('Erro ao adicionar trilha:', erro);
-          }
-        }
+      for (const trilhaId of trilhasAluno) {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/inscrever`,
+          { aluno_id: alunoEditando.id, trilha_id: trilhaId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       }
 
       alert('Trilhas atualizadas com sucesso!');
       setShowFormEditar(false);
       setAlunoEditando(null);
       setTrilhasAluno([]);
-      setTrilhasOriginais([]);
       fetchAlunos(token, busca);
     } catch (erro) {
-      alert('Erro ao atualizar trilhas');
+      alert(erro.response?.data?.erro || 'Erro ao atualizar trilhas');
     }
   };
 
@@ -410,7 +380,6 @@ export default function AlunosPage() {
                     setShowFormEditar(false);
                     setAlunoEditando(null);
                     setTrilhasAluno([]);
-                    setTrilhasOriginais([]);
                   }}
                   style={{
                     padding: '10px 20px',
