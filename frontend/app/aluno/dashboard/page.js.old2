@@ -8,7 +8,6 @@ import Footer from '@/components/Footer';
 
 export default function AlunoDashboardPage() {
   const [trilhas, setTrilhas] = useState([]);
-  const [trilhasNovas, setTrilhasNovas] = useState([]);
   const [progresso, setProgresso] = useState({});
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
@@ -40,14 +39,10 @@ export default function AlunoDashboardPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/com-status/todas`,
         { headers: { Authorization: `Bearer ${t}` } }
       );
-      
       const minhasTrilhas = response.data.filter(tr => tr.status_inscricao === 'inscrito');
-      const novasDisponibles = response.data.filter(tr => tr.status_inscricao === 'nao_inscrito');
-      
       setTrilhas(minhasTrilhas);
-      setTrilhasNovas(novasDisponibles);
 
-      // Buscar progresso de cada trilha inscrita
+      // Buscar progresso de cada trilha
       const progressoMap = {};
       for (const trilha of minhasTrilhas) {
         try {
@@ -57,6 +52,7 @@ export default function AlunoDashboardPage() {
           );
           progressoMap[trilha.id] = progRes.data;
         } catch (erro) {
+          console.error('Erro ao buscar progresso:', erro);
           progressoMap[trilha.id] = { total: 0, completadas: 0, faltam: 0, percentual: 0 };
         }
       }
@@ -129,68 +125,34 @@ export default function AlunoDashboardPage() {
           </div>
         )}
 
-        {/* BANNER DE TRILHAS NOVAS */}
-        {trilhasNovas.length > 0 && (
-          <div style={{
-            backgroundColor: '#2f9e44',
-            color: '#fff',
-            padding: '20px',
-            borderRadius: '8px',
-            marginBottom: '30px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <div>
-              <strong>🎉 {trilhasNovas.length} nova trilha disponível!</strong>
-              <p style={{ marginTop: '5px', marginBottom: 0, fontSize: '14px' }}>
-                Explore e adquira acesso às novidades do seu aprendizado
-              </p>
-            </div>
-            <button
-              onClick={() => router.push('/aluno/explorar')}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#fff',
-                color: '#2f9e44',
-                border: 'none',
-                borderRadius: '4px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                marginLeft: '20px'
-              }}
-            >
-              Ver Trilhas →
-            </button>
-          </div>
-        )}
-
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
           <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
+          <button
+            onClick={() => router.push('/aluno/explorar')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: 'var(--primary)',
+              color: '#000',
+              border: 'none',
+              borderRadius: '4px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            ➕ Explorar Trilhas
+          </button>
         </div>
 
         {trilhas.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ color: '#ccc', fontSize: '18px', marginBottom: '20px' }}>
-              Você não está inscrito em nenhuma trilha ainda.
-            </p>
+          <p style={{ marginTop: '20px', color: '#ccc' }}>
+            Você não está inscrito em nenhuma trilha ainda.{' '}
             <button
               onClick={() => router.push('/aluno/explorar')}
-              style={{
-                padding: '12px 30px',
-                backgroundColor: 'var(--primary)',
-                color: '#000',
-                border: 'none',
-                borderRadius: '4px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '16px'
-              }}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}
             >
-              Explore Trilhas Disponíveis
+              Explore trilhas disponíveis →
             </button>
-          </div>
+          </p>
         ) : (
           <div style={{
             display: 'grid',
