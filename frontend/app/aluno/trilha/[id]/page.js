@@ -268,8 +268,12 @@ export default function TrilhaPage() {
           <aside className="licoes-sidebar">
             {statusAcesso && (
               <div style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border)',
+                background: statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 15
+                  ? '#fff3cd'
+                  : 'var(--bg-secondary)',
+                border: statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 15
+                  ? '2px solid #ff922b'
+                  : '1px solid var(--border)',
                 borderRadius: '6px',
                 padding: '12px',
                 marginBottom: '20px'
@@ -277,21 +281,31 @@ export default function TrilhaPage() {
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                   ⏰ Seu Acesso
                 </div>
+
                 {statusAcesso.status_acesso === 'ativo' && (
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#51cf66' }}>
-                    ✓ Ativo ({statusAcesso.dias_faltando} dias)
+                    ✓ {statusAcesso.dias_faltando} {statusAcesso.dias_faltando === 1 ? 'dia' : 'dias'} restantes
                   </div>
                 )}
-                {statusAcesso.status_acesso === 'expirando_em_breve' && (
+
+                {statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando > 5 && (
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff922b' }}>
-                    ⚠️ Expira em {statusAcesso.dias_faltando} dias
+                    ⚠️ {statusAcesso.dias_faltando} {statusAcesso.dias_faltando === 1 ? 'dia' : 'dias'} restantes
                   </div>
                 )}
+
+                {statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 5 && (
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
+                    🚨 {statusAcesso.dias_faltando} {statusAcesso.dias_faltando === 1 ? 'dia' : 'dias'} RESTANTE(S)
+                  </div>
+                )}
+
                 {statusAcesso.status_acesso === 'expirado' && (
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
                     ✗ Acesso Expirado
                   </div>
                 )}
+
                 {statusAcesso.status_acesso === 'bloqueado_manualmente' && (
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
                     🔒 Acesso Bloqueado
