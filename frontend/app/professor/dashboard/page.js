@@ -18,6 +18,16 @@ export default function ProfessorDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [token, setToken] = useState(null);
+
+  // Estados para edição
+  const [editandoId, setEditandoId] = useState(null);
+  const [editarNome, setEditarNome] = useState('');
+  const [editarSinopse, setEditarSinopse] = useState('');
+  const [editarLinkAsaas, setEditarLinkAsaas] = useState('');
+  const [editarImagem, setEditarImagem] = useState(null);
+  const [editarPreviewImagem, setEditarPreviewImagem] = useState(null);
+  const [erroEdicao, setErroEdicao] = useState('');
+
   const router = useRouter();
 
   useEffect(() => {
@@ -100,6 +110,53 @@ export default function ProfessorDashboardPage() {
       setTrilhas(trilhas.filter((t) => t.id !== id));
     } catch (erro) {
       alert('Erro ao deletar trilha');
+    }
+  };
+
+  const handleAbrirEdicao = (trilha) => {
+    setEditandoId(trilha.id);
+    setEditarNome(trilha.nome || '');
+    setEditarSinopse(trilha.sinopse || '');
+    setEditarLinkAsaas(trilha.link_asaas || '');
+    setEditarImagem(null);
+    setEditarPreviewImagem(null);
+    setErroEdicao('');
+  };
+
+  const handleCancelarEdicao = () => {
+    setEditandoId(null);
+    setErroEdicao('');
+  };
+
+  const handleAtualizarTrilha = async (e) => {
+    e.preventDefault();
+    setErroEdicao('');
+
+    try {
+      const formData = new FormData();
+      formData.append('nome', editarNome);
+      formData.append('sinopse', editarSinopse);
+      formData.append('link_asaas', editarLinkAsaas);
+      if (editarImagem) {
+        formData.append('imagem', editarImagem);
+      }
+
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${editandoId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Atualizar trilha na lista
+      setTrilhas(trilhas.map((t) => (t.id === editandoId ? response.data : t)));
+      setEditandoId(null);
+    } catch (erro) {
+      setErroEdicao(erro.response?.data?.erro || 'Erro ao atualizar trilha');
     }
   };
 
@@ -222,6 +279,138 @@ export default function ProfessorDashboardPage() {
           </div>
         )}
 
+        {/* MODAL DE EDIÇÃO */}
+        {editandoId && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}>
+            <div style={{
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '8px',
+              padding: '30px',
+              maxWidth: '500px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              border: '1px solid var(--border)',
+            }}>
+              <h2 style={{ marginTop: 0, marginBottom: '20px', color: 'var(--primary)' }}>
+                Editar Trilha
+              </h2>
+
+              <form onSubmit={handleAtualizarTrilha}>
+                <div className="form-group">
+                  <label htmlFor="editNome">Nome da Trilha</label>
+                  <input
+                    id="editNome"
+                    type="text"
+                    value={editarNome}
+                    onChange={(e) => setEditarNome(e.target.value)}
+                    placeholder="ex: Marketing Digital"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="editSinopse">Sinopse Breve</label>
+                  <textarea
+                    id="editSinopse"
+                    value={editarSinopse}
+                    onChange={(e) => setEditarSinopse(e.target.value)}
+                    placeholder="Resumo breve do que se trata este curso..."
+                    rows="2"
+                    maxLength="200"
+                  />
+                  <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                    {editarSinopse.length}/200 caracteres
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="editLinkAsaas">Link Asaas (Compra/Autorização) - Opcional</label>
+                  <input
+                    id="editLinkAsaas"
+                    type="url"
+                    value={editarLinkAsaas}
+                    onChange={(e) => setEditarLinkAsaas(e.target.value)}
+                    placeholder="https://asaas.com/..."
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="editImagem">Imagem Ilustrativa (375x165) - Opcional</label>
+                  <input
+                    id="editImagem"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      setEditarImagem(file);
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setEditarPreviewImagem(reader.result);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    style={{
+                      padding: '8px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  />
+                </div>
+
+                {editarPreviewImagem && (
+                  <div style={{ marginBottom: '15px' }}>
+                    <p style={{ fontSize: '12px', marginBottom: '8px', color: 'var(--text-muted)' }}>
+                      Preview da nova imagem:
+                    </p>
+                    <img
+                      src={editarPreviewImagem}
+                      alt="Preview"
+                      style={{
+                        width: '100%',
+                        maxWidth: '375px',
+                        height: '165px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        border: '1px solid var(--border)',
+                      }}
+                    />
+                  </div>
+                )}
+
+                {erroEdicao && <div className="error">{erroEdicao}</div>}
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button type="submit" className="btn-primary" style={{ flex: 1 }}>
+                    Salvar Alterações
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelarEdicao}
+                    className="btn-secondary"
+                    style={{ flex: 1 }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {trilhas.length === 0 ? (
           <p style={{ color: 'var(--text-muted)' }}>Você ainda não criou nenhuma trilha.</p>
         ) : (
@@ -259,6 +448,13 @@ export default function ProfessorDashboardPage() {
                     style={{ flex: 1 }}
                   >
                     Gerenciar
+                  </button>
+                  <button
+                    onClick={() => handleAbrirEdicao(trilha)}
+                    className="btn-primary"
+                    style={{ flex: 1 }}
+                  >
+                    ✏️ Editar
                   </button>
                   <button
                     onClick={() => handleDeletarTrilha(trilha.id)}
