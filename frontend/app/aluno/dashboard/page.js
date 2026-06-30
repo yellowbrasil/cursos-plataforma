@@ -13,6 +13,9 @@ export default function AlunoDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
   const [abaAtiva, setAbaAtiva] = useState('minhas');
+  const [statusAcesso, setStatusAcesso] = useState({});
+  const [modalAvisoBloqueado, setModalAvisoBloqueado] = useState(false);
+  const [trilhaComAviso, setTrilhaComAviso] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,14 +24,16 @@ export default function AlunoDashboardPage() {
       router.push('/login');
       return;
     }
+    const u = JSON.parse(localStorage.getItem('usuario') || '{}');
     setToken(t);
-    fetchData(t);
+    fetchData(t, u.id);
   }, [router]);
 
-  const fetchData = async (t) => {
+  const fetchData = async (t, userId) => {
     try {
       await fetchTrilhas(t);
       await fetchConfiguracoes(t);
+      await fetchStatusAcesso(t, userId);
     } finally {
       setLoading(false);
     }
@@ -75,6 +80,22 @@ export default function AlunoDashboardPage() {
     }
   };
 
+  const fetchStatusAcesso = async (t, userId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`,
+        { headers: { Authorization: `Bearer ${t}` } }
+      );
+      const statusMap = {};
+      response.data.forEach(item => {
+        statusMap[item.trilha_id] = item;
+      });
+      setStatusAcesso(statusMap);
+    } catch (erro) {
+      console.error('Erro ao buscar status de acesso:', erro);
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -89,10 +110,36 @@ export default function AlunoDashboardPage() {
   const minhasTrilhas = todasTrilhas.filter(t => t.status_inscricao === 'inscrito');
   const novasTrilhas = todasTrilhas.filter(t => t.status_inscricao === 'nao_inscrito');
 
-  const trilhasParaMostrar = 
+  const trilhasParaMostrar =
     abaAtiva === 'minhas' ? minhasTrilhas :
     abaAtiva === 'novo' ? novasTrilhas :
     todasTrilhas;
+
+  const handleRenovar = async () => {
+    if (!trilhaComAviso || !token) return;
+
+    try {
+      const statusTrilha = statusAcesso[trilhaComAviso.id];
+      const inscricaoId = statusTrilha?.id;
+
+      if (!inscricaoId) {
+        alert('Erro: não conseguimos identificar sua inscrição');
+        return;
+      }
+
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/${inscricaoId}/renovar`,
+        { dias_adicionais: 30 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      await fetchStatusAcesso(token, JSON.parse(localStorage.getItem('usuario') || '{}').id);
+      setModalAvisoBloqueado(false);
+      alert('Acesso renovado com sucesso! Adicionados 30 dias.');
+    } catch (erro) {
+      alert('Erro ao renovar acesso: ' + (erro.response?.data?.erro || erro.message));
+    }
+  };
 
   return (
     <>
@@ -245,11 +292,49 @@ export default function AlunoDashboardPage() {
                     position: 'relative',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                   }}
-                  onClick={() => isComprada && router.push(`/aluno/trilha/${trilha.id}`)}
+                  onClick={() => {
+                    if (!isComprada) return;
+
+                    const status = statusAcesso[trilha.id];
+
+                    if (status?.status === 'expirado' || status?.status === 'bloqueado_manualmente') {
+                      return;
+                    }
+
+                    if (status?.status === 'expirando_em_breve') {
+                      setTrilhaComAviso({
+                        id: trilha.id,
+                        nome: trilha.nome,
+                        aviso: status.aviso,
+                        dias_faltando: status.dias_faltando
+                      });
+                      setModalAvisoBloqueado(true);
+                      return;
+                    }
+
+                    router.push(`/aluno/trilha/${trilha.id}`);
+                  }}
                   onMouseEnter={(e) => isComprada && (e.currentTarget.style.transform = 'translateY(-8px)', e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)')}
                   onMouseLeave={(e) => isComprada && (e.currentTarget.style.transform = 'translateY(0)', e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)')}
                 >
                   {/* TARJAS */}
+                  {statusAcesso[trilha.id]?.status === 'expirando_em_breve' && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      backgroundColor: '#ff6b6b',
+                      color: '#fff',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      zIndex: 10
+                    }}>
+                      ● EXPIRA EM {statusAcesso[trilha.id]?.dias_faltando} DIAS
+                    </div>
+                  )}
+
                   {isComprada && prog.percentual === 100 && (
                     <div style={{
                       position: 'absolute',
@@ -375,6 +460,88 @@ export default function AlunoDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* MODAL DE AVISO DE EXPIRAÇÃO */}
+      {modalAvisoBloqueado && trilhaComAviso && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-card)',
+            borderRadius: '12px',
+            padding: '30px',
+            maxWidth: '500px',
+            width: '90%',
+            border: '2px solid #ff6b6b',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          }}>
+            <h2 style={{ color: '#ff6b6b', marginTop: 0, marginBottom: '15px', fontSize: '20px' }}>
+              ⚠️ Seu acesso está expirando!
+            </h2>
+
+            <p style={{ color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.6' }}>
+              <strong>{trilhaComAviso.nome}</strong>
+            </p>
+
+            <p style={{ color: 'var(--text)', marginBottom: '25px', fontSize: '14px', lineHeight: '1.6' }}>
+              Faltam apenas <strong>{trilhaComAviso.dias_faltando} dias</strong> para você perder acesso a esta trilha.
+            </p>
+
+            <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '13px' }}>
+              {trilhaComAviso.aviso}
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handleRenovar}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'var(--primary)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                ● Renovar Acesso
+              </button>
+
+              <button
+                onClick={() => {
+                  setModalAvisoBloqueado(false);
+                  router.push(`/aluno/trilha/${trilhaComAviso.id}`);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'transparent',
+                  color: 'var(--primary)',
+                  border: '2px solid var(--primary)',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                ● Depois
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );
