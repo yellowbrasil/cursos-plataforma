@@ -24,9 +24,31 @@ export default function AlunoDashboardPage() {
       router.push('/login');
       return;
     }
+
+    // Tentar extrair userId do localStorage
+    let userId = null;
     const u = JSON.parse(localStorage.getItem('usuario') || '{}');
+    userId = u.id;
+
+    // Fallback: extrair do JWT se localStorage falhar
+    if (!userId && t) {
+      try {
+        const payload = JSON.parse(atob(t.split('.')[1]));
+        userId = payload.id;
+        console.log('[DEBUG] UserId extraído do JWT:', userId);
+      } catch (e) {
+        console.error('[DEBUG] Erro ao decodificar JWT:', e);
+      }
+    }
+
+    if (!userId) {
+      console.error('[DEBUG] Erro: userId não encontrado');
+      return;
+    }
+
+    console.log('[DEBUG] UserId obtido:', userId);
     setToken(t);
-    fetchData(t, u.id);
+    fetchData(t, userId);
   }, [router]);
 
   const fetchData = async (t, userId) => {
