@@ -1,0 +1,294 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+export default function AlunoDashboardPage() {
+  const [trilhas, setTrilhas] = useState([]);
+  const [trilhasNovas, setTrilhasNovas] = useState([]);
+  const [progresso, setProgresso] = useState({});
+  const [config, setConfig] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const t = localStorage.getItem('token');
+    if (!t) {
+      router.push('/login');
+      return;
+    }
+    setToken(t);
+    fetchData(t);
+  }, [router]);
+
+  const fetchData = async (t) => {
+    try {
+      await fetchTrilhas(t);
+      await fetchConfiguracoes(t);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTrilhas = async (t) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/com-status/todas`,
+        { headers: { Authorization: `Bearer ${t}` } }
+      );
+      
+      const minhasTrilhas = response.data.filter(tr => tr.status_inscricao === 'inscrito');
+      const novasDisponibles = response.data.filter(tr => tr.status_inscricao === 'nao_inscrito');
+      
+      setTrilhas(minhasTrilhas);
+      setTrilhasNovas(novasDisponibles);
+
+      // Buscar progresso de cada trilha inscrita
+      const progressoMap = {};
+      for (const trilha of minhasTrilhas) {
+        try {
+          const progRes = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/progresso/${trilha.id}`,
+            { headers: { Authorization: `Bearer ${t}` } }
+          );
+          progressoMap[trilha.id] = progRes.data;
+        } catch (erro) {
+          progressoMap[trilha.id] = { total: 0, completadas: 0, faltam: 0, percentual: 0 };
+        }
+      }
+      setProgresso(progressoMap);
+    } catch (erro) {
+      console.error('Erro ao buscar trilhas:', erro);
+    }
+  };
+
+  const fetchConfiguracoes = async (t) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`,
+        { headers: { Authorization: `Bearer ${t}` } }
+      );
+      setConfig(response.data);
+    } catch (erro) {
+      console.error('Erro:', erro);
+    }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="container" style={{ marginTop: '40px' }}>
+          <p>Carregando...</p>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Header />
+
+      {config.banner_url && (
+        <div style={{
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginTop: '20px',
+          marginBottom: '40px',
+        }}>
+          <img
+            src={`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes/banner/download`}
+            alt="Banner"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+            }}
+            loading="eager"
+          />
+        </div>
+      )}
+
+      <div className="container" style={{ marginTop: '40px', marginBottom: '60px' }}>
+        {config.aviso_alunos && (
+          <div style={{
+            backgroundColor: 'var(--primary)',
+            color: '#000',
+            padding: '16px',
+            borderRadius: '4px',
+            marginBottom: '30px',
+            fontWeight: '600',
+            fontSize: '14px',
+            lineHeight: '1.5',
+          }}>
+            📢 {config.aviso_alunos}
+          </div>
+        )}
+
+        {/* BANNER DE TRILHAS NOVAS */}
+        {trilhasNovas.length > 0 && (
+          <div style={{
+            backgroundColor: '#2f9e44',
+            color: '#fff',
+            padding: '20px',
+            borderRadius: '8px',
+            marginBottom: '30px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <strong>🎉 {trilhasNovas.length} nova trilha disponível!</strong>
+              <p style={{ marginTop: '5px', marginBottom: 0, fontSize: '14px' }}>
+                Explore e adquira acesso às novidades do seu aprendizado
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/aluno/explorar')}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#fff',
+                color: '#2f9e44',
+                border: 'none',
+                borderRadius: '4px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                marginLeft: '20px'
+              }}
+            >
+              Ver Trilhas →
+            </button>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
+        </div>
+
+        {trilhas.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <p style={{ color: '#ccc', fontSize: '18px', marginBottom: '20px' }}>
+              Você não está inscrito em nenhuma trilha ainda.
+            </p>
+            <button
+              onClick={() => router.push('/aluno/explorar')}
+              style={{
+                padding: '12px 30px',
+                backgroundColor: 'var(--primary)',
+                color: '#000',
+                border: 'none',
+                borderRadius: '4px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
+              Explore Trilhas Disponíveis
+            </button>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '20px',
+            marginTop: '30px'
+          }}>
+            {trilhas.map((trilha) => {
+              const prog = progresso[trilha.id] || { total: 0, completadas: 0, faltam: 0, percentual: 0 };
+              return (
+                <div
+                  key={trilha.id}
+                  onClick={() => router.push(`/aluno/trilha/${trilha.id}`)}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  {trilha.imagem_url && (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
+                      alt={trilha.nome}
+                      style={{
+                        width: '100%',
+                        height: '180px',
+                        objectFit: 'cover',
+                      }}
+                      onError={(e) => e.target.style.display = 'none'}
+                    />
+                  )}
+
+                  <div style={{ padding: '20px' }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '8px', color: 'var(--primary)' }}>
+                      {trilha.nome}
+                    </h3>
+
+                    {trilha.sinopse && (
+                      <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '15px' }}>
+                        {trilha.sinopse}
+                      </p>
+                    )}
+
+                    {/* Progresso */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Progresso</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                          {prog.completadas}/{prog.total} lições
+                        </span>
+                      </div>
+                      <div style={{
+                        width: '100%',
+                        height: '8px',
+                        backgroundColor: 'var(--bg-dark)',
+                        borderRadius: '4px',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${prog.percentual}%`,
+                          backgroundColor: prog.percentual === 100 ? '#51cf66' : 'var(--primary)',
+                          transition: 'width 0.3s'
+                        }} />
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', textAlign: 'right' }}>
+                        {prog.percentual}% · {prog.faltam} faltando
+                      </div>
+                    </div>
+
+                    <button
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: prog.percentual === 100 ? '#51cf66' : 'var(--primary)',
+                        color: prog.percentual === 100 ? '#000' : '#000',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '13px'
+                      }}
+                    >
+                      {prog.percentual === 100 ? '✅ Concluído' : 'Continuar'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <Footer />
+    </>
+  );
+}
