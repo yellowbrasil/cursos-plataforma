@@ -90,7 +90,7 @@ export default function TrilhaPage() {
   }, [router, params.id]);
 
   useEffect(() => {
-    if (!token || !userId) return;
+    if (!token || !userId || !params.id) return;
 
     const fetchStatusAcesso = async () => {
       try {
@@ -99,10 +99,19 @@ export default function TrilhaPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
+        if (!res.data || !Array.isArray(res.data)) {
+          console.warn('Resposta inválida da API de acesso:', res.data);
+          return;
+        }
+
         // Encontrar status para a trilha atual
-        const trilhaStatus = res.data.find(s => s.trilha_id === parseInt(params.id));
+        const trilhaIdNumero = parseInt(params.id);
+        const trilhaStatus = res.data.find(s => s.trilha_id === trilhaIdNumero);
+
         if (trilhaStatus) {
           setStatusAcesso(trilhaStatus);
+        } else {
+          console.warn(`Status não encontrado para trilha ${trilhaIdNumero}`);
         }
       } catch (erro) {
         console.error('Erro ao buscar status de acesso:', erro);
