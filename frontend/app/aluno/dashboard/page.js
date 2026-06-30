@@ -129,7 +129,7 @@ export default function AlunoDashboardPage() {
             fontWeight: '600',
             fontSize: '14px',
           }}>
-            📢 {config.aviso_alunos}
+            ● {config.aviso_alunos}
           </div>
         )}
 
