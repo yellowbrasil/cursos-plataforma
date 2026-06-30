@@ -21,11 +21,8 @@ mkdir -p "$BACKUP_DIR"
 # Executar backup
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando backup do banco: $DB_NAME"
 
-pg_dump \
-  --host="$DB_HOST" \
-  --username="$DB_USER" \
+sudo -u postgres pg_dump \
   --format=plain \
-  --no-password \
   "$DB_NAME" > "$BACKUP_FILE"
 
 # Validar backup
