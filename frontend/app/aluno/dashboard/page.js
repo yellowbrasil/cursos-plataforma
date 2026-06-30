@@ -96,24 +96,37 @@ export default function AlunoDashboardPage() {
   };
 
   const fetchStatusAcesso = async (t, userId) => {
-    if (!t || !userId) return;
+    if (!t || !userId) {
+      console.log('fetchStatusAcesso: token ou userId faltando');
+      return;
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`;
+    console.log('Buscando status em:', url);
 
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`,
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
-
-      if (!response.data || !Array.isArray(response.data)) return;
-
-      const statusMap = {};
-      response.data.forEach(item => {
-        statusMap[item.trilha_id] = item;
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${t}` }
       });
 
-      setStatusAcesso(statusMap);
+      console.log('Resposta da API:', response.data);
+
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const statusMap = {};
+        response.data.forEach(item => {
+          statusMap[item.trilha_id] = item;
+        });
+        console.log('StatusMap atualizado:', statusMap);
+        setStatusAcesso(statusMap);
+      } else {
+        console.log('Nenhum dado de status retornado');
+      }
     } catch (erro) {
-      console.error('Erro ao buscar status de acesso:', erro.message);
+      console.error('ERRO na API:', erro.message);
+      if (erro.response) {
+        console.error('Status:', erro.response.status);
+        console.error('Data:', erro.response.data);
+      }
     }
   };
 
