@@ -69,7 +69,7 @@ function ConfiguracoesContent() {
         }
       );
 
-      setMensagem('✅ Configurações salvas com sucesso!');
+      setMensagem('● Configurações salvas com sucesso!');
       setBanner(null);
       if (response.data.banner_url) {
         setPreviewBanner(response.data.banner_url);
@@ -77,7 +77,7 @@ function ConfiguracoesContent() {
 
       setTimeout(() => setMensagem(''), 3000);
     } catch (erro) {
-      setMensagem('❌ ' + (erro.response?.data?.erro || 'Erro ao salvar'));
+      setMensagem('● ' + (erro.response?.data?.erro || 'Erro ao salvar'));
     } finally {
       setSalvando(false);
     }
@@ -97,8 +97,8 @@ function ConfiguracoesContent() {
   }
 
   const abas = [
-    { id: 'banner', label: '🖼️ Banner' },
-    { id: 'avisos', label: '📢 Avisos' },
+    { id: 'banner', label: '● Banner' },
+    { id: 'avisos', label: '● Avisos' },
   ];
 
   return (
@@ -264,7 +264,7 @@ function ConfiguracoesContent() {
                   fontSize: '13px',
                   fontWeight: '600',
                 }}>
-                  <span style={{ marginRight: '8px' }}>📢</span>
+                  <span style={{ marginRight: '8px' }}>●</span>
                   {aviso}
                 </div>
               )}
@@ -296,7 +296,7 @@ function ConfiguracoesContent() {
             disabled={salvando}
             style={{ width: '100%', marginTop: '20px' }}
           >
-            {salvando ? 'Salvando...' : '💾 Salvar Configurações'}
+            {salvando ? 'Salvando...' : '● Salvar Configurações'}
           </button>
         </form>
       </div>
