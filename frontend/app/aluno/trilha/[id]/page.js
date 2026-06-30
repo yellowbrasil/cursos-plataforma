@@ -188,6 +188,51 @@ export default function TrilhaPage() {
         </div>
       )}
       <div className="trilha-container">
+        {!licaoSelecionada && statusAcesso && (
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 15
+              ? '#fff3cd'
+              : 'var(--bg-card)',
+            border: statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 15
+              ? '2px solid #ff922b'
+              : '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '15px 20px',
+            maxWidth: '250px'
+          }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              ⏰ Seu Acesso
+            </div>
+            {statusAcesso.status_acesso === 'ativo' && (
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#51cf66' }}>
+                ✓ {statusAcesso.dias_faltando} {statusAcesso.dias_faltando === 1 ? 'dia' : 'dias'}
+              </div>
+            )}
+            {statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando > 5 && (
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#ff922b' }}>
+                ⚠️ {statusAcesso.dias_faltando} {statusAcesso.dias_faltando === 1 ? 'dia' : 'dias'}
+              </div>
+            )}
+            {statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 5 && (
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#ff6b6b' }}>
+                🚨 {statusAcesso.dias_faltando} RESTANTE(S)
+              </div>
+            )}
+            {statusAcesso.status_acesso === 'expirado' && (
+              <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
+                ✗ Acesso Expirado
+              </div>
+            )}
+            {statusAcesso.status_acesso === 'bloqueado_manualmente' && (
+              <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
+                🔒 Acesso Bloqueado
+              </div>
+            )}
+          </div>
+        )}
         <div className="trilha-content">
           {licaoSelecionada ? (
             <div className="licao-area">
