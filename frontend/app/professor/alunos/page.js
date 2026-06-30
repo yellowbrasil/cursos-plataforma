@@ -409,20 +409,19 @@ export default function AlunosPage() {
                       </div>
 
                       {trilhasAluno.includes(trilha.id) && (
-                        <div style={{ marginLeft: '26px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ marginLeft: '26px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                            Duração de acesso:
+                            Duração:
                           </label>
                           <input
                             type="number"
                             min="1"
-                            max="365"
                             value={duracoesAcesso[trilha.id] || 30}
                             onChange={(e) => {
                               setDuracoesAcesso({ ...duracoesAcesso, [trilha.id]: e.target.value });
                             }}
                             style={{
-                              width: '60px',
+                              width: '70px',
                               padding: '6px',
                               border: '1px solid var(--border)',
                               borderRadius: '4px',
@@ -432,6 +431,61 @@ export default function AlunosPage() {
                             }}
                           />
                           <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>dias</span>
+
+                          {/* Presets rápidos */}
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            <button
+                              type="button"
+                              onClick={() => setDuracoesAcesso({ ...duracoesAcesso, [trilha.id]: '30' })}
+                              style={{
+                                padding: '4px 8px',
+                                fontSize: '11px',
+                                backgroundColor: 'var(--primary)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                              }}
+                              title="Teste/suspeito"
+                            >
+                              30d
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDuracoesAcesso({ ...duracoesAcesso, [trilha.id]: '365' })}
+                              style={{
+                                padding: '4px 8px',
+                                fontSize: '11px',
+                                backgroundColor: '#666',
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                              }}
+                              title="1 ano"
+                            >
+                              1ano
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDuracoesAcesso({ ...duracoesAcesso, [trilha.id]: '999999' })}
+                              style={{
+                                padding: '4px 8px',
+                                fontSize: '11px',
+                                backgroundColor: '#51cf66',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                              }}
+                              title="Ilimitado (~2740 anos)"
+                            >
+                              ∞
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
