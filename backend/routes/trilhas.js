@@ -68,21 +68,17 @@ router.post('/', verificarJWT, verificarProfessor, uploadImagem.single('imagem')
   try {
     const { nome, descricao, sinopse, link_asaas, ordem } = req.body;
 
-    if (!nome) {
-      return res.status(400).json({ erro: 'Nome da trilha é obrigatório' });
-    }
-
     const imagem_url = req.file ? `/uploads/imagens/${req.file.filename}` : null;
 
     const result = await pool.query(
       'INSERT INTO trilhas (nome, descricao, sinopse, ordem, imagem_url, link_asaas, ativo, criado_por_professor_id, criado_em) VALUES ($1, $2, $3, $4, $5, $6, TRUE, $7, NOW()) RETURNING *',
-      [nome, descricao || '', sinopse || '', ordem || 1, imagem_url, link_asaas || '', req.usuario_id]
+      [nome || 'Trilha sem nome', descricao || '', sinopse || '', ordem || 1, imagem_url, link_asaas || '', req.usuario_id]
     );
 
     res.status(201).json(result.rows[0]);
   } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ erro: 'Erro ao criar trilha' });
+    console.error('Erro ao criar trilha:', erro);
+    res.status(500).json({ erro: 'Erro ao criar trilha: ' + erro.message });
   }
 });
 

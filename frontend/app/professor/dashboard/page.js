@@ -56,11 +56,6 @@ export default function ProfessorDashboardPage() {
     e.preventDefault();
     setErro('');
 
-    if (!nome) {
-      setErro('Nome da trilha é obrigatório');
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append('nome', nome);
