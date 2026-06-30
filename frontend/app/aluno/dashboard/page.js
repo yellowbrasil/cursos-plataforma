@@ -86,13 +86,23 @@ export default function AlunoDashboardPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`,
         { headers: { Authorization: `Bearer ${t}` } }
       );
+
+      if (!response.data || !Array.isArray(response.data)) {
+        console.warn('Resposta inválida da API de acesso:', response.data);
+        return;
+      }
+
       const statusMap = {};
       response.data.forEach(item => {
         statusMap[item.trilha_id] = item;
+        console.log(`[DEBUG] Status carregado - Trilha ${item.trilha_id}: ${item.status_acesso} (${item.dias_faltando} dias)`);
       });
+
+      console.log('[DEBUG] StatusMap completo:', statusMap);
       setStatusAcesso(statusMap);
     } catch (erro) {
       console.error('Erro ao buscar status de acesso:', erro);
+      console.error('Detalhes:', erro.response?.data || erro.message);
     }
   };
 
@@ -319,7 +329,7 @@ export default function AlunoDashboardPage() {
                 >
                   {/* TARJAS */}
                   {/* Contador de dias - SEMPRE visível para trilhas compradas */}
-                  {isComprada && statusAcesso[trilha.id] && (
+                  {isComprada && statusAcesso && statusAcesso[trilha.id] && (
                     <div style={{
                       position: 'absolute',
                       top: '8px',
