@@ -318,20 +318,38 @@ export default function AlunoDashboardPage() {
                   onMouseLeave={(e) => isComprada && (e.currentTarget.style.transform = 'translateY(0)', e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)')}
                 >
                   {/* TARJAS */}
-                  {statusAcesso[trilha.id]?.status === 'expirando_em_breve' && (
+                  {/* Contador de dias - SEMPRE visível para trilhas compradas */}
+                  {isComprada && statusAcesso[trilha.id] && (
                     <div style={{
                       position: 'absolute',
                       top: '8px',
                       right: '8px',
-                      backgroundColor: '#ff6b6b',
-                      color: '#fff',
+                      backgroundColor:
+                        statusAcesso[trilha.id]?.status_acesso === 'ativo' ? '#51cf66' :
+                        statusAcesso[trilha.id]?.status_acesso === 'expirando_em_breve' && statusAcesso[trilha.id]?.dias_faltando > 5 ? '#ff922b' :
+                        '#ff6b6b',
+                      color: statusAcesso[trilha.id]?.status_acesso === 'ativo' ? '#000' : '#fff',
                       padding: '6px 12px',
                       borderRadius: '20px',
                       fontSize: '11px',
                       fontWeight: '700',
                       zIndex: 10
                     }}>
-                      ● EXPIRA EM {statusAcesso[trilha.id]?.dias_faltando} DIAS
+                      {statusAcesso[trilha.id]?.status_acesso === 'ativo' && (
+                        `● ${statusAcesso[trilha.id]?.dias_faltando} DIAS`
+                      )}
+                      {statusAcesso[trilha.id]?.status_acesso === 'expirando_em_breve' && statusAcesso[trilha.id]?.dias_faltando > 5 && (
+                        `● ${statusAcesso[trilha.id]?.dias_faltando} DIAS`
+                      )}
+                      {statusAcesso[trilha.id]?.status_acesso === 'expirando_em_breve' && statusAcesso[trilha.id]?.dias_faltando <= 5 && (
+                        `🚨 ${statusAcesso[trilha.id]?.dias_faltando} DIAS`
+                      )}
+                      {statusAcesso[trilha.id]?.status_acesso === 'expirado' && (
+                        `● EXPIRADO`
+                      )}
+                      {statusAcesso[trilha.id]?.status_acesso === 'bloqueado_manualmente' && (
+                        `● BLOQUEADO`
+                      )}
                     </div>
                   )}
 
