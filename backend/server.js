@@ -13,6 +13,7 @@ import reordenarRoutes from './routes/reordenar.js';
 import alunosRoutes from './routes/alunos.js';
 import configuracoesRoutes from './routes/configuracoes.js';
 import adminAlunosRoutes from './routes/admin-alunos.js';
+import acessoTemporalRoutes from './routes/acesso-temporal.js';
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use('/api/reordenar', reordenarRoutes);
 app.use('/api/alunos', alunosRoutes);
 app.use('/api/configuracoes', configuracoesRoutes);
 app.use('/api/admin/alunos', adminAlunosRoutes);
+app.use('/api/acesso', acessoTemporalRoutes);
 
 // Servir arquivos de upload
 app.use('/uploads', express.static('uploads'));
