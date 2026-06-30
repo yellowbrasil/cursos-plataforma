@@ -226,8 +226,14 @@ router.get('/aluno/:aluno_id/status', verificarJWT, async (req, res) => {
   try {
     const { aluno_id } = req.params;
 
+    console.log(`[ACESSO-TEMPORAL] GET /aluno/${aluno_id}/status`);
+    console.log(`  req.usuario_id: ${req.usuario_id} (tipo: ${typeof req.usuario_id})`);
+    console.log(`  req.tipo_usuario: ${req.tipo_usuario}`);
+    console.log(`  aluno_id param: ${aluno_id} (tipo: ${typeof aluno_id})`);
+
     // Verificar permissão: é o próprio aluno ou professor
     if (req.tipo_usuario === 'aluno' && req.usuario_id !== parseInt(aluno_id)) {
+      console.log(`  [ERRO] Acesso negado! ${req.usuario_id} !== ${parseInt(aluno_id)}`);
       return res.status(403).json({ erro: 'Acesso negado' });
     }
 
@@ -240,9 +246,11 @@ router.get('/aluno/:aluno_id/status', verificarJWT, async (req, res) => {
       [aluno_id]
     );
 
+    console.log(`  [OK] Retornando ${result.rows.length} linhas`);
+    console.log(`  Dados:`, result.rows);
     res.json(result.rows);
   } catch (erro) {
-    console.error(erro);
+    console.error('[ACESSO-TEMPORAL] Erro:', erro);
     res.status(500).json({ erro: 'Erro ao listar status de acesso' });
   }
 });
