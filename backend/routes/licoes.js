@@ -97,7 +97,7 @@ router.put('/:id', verificarJWT, verificarProfessor, async (req, res) => {
     }
 
     const result = await pool.query(
-      'UPDATE licoes SET nome = $1, descricao = $2, video_url = $3, ordem = $4, atualizado_em = NOW() WHERE id = $5 RETURNING *',
+      'UPDATE licoes SET nome = $1, descricao = $2, video_url = $3, ordem = $4 WHERE id = $5 RETURNING *',
       [
         nome || licao.rows[0].nome,
         descricao !== undefined ? descricao : licao.rows[0].descricao,

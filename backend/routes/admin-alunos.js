@@ -221,10 +221,10 @@ router.put('/:id/trilhas', verificarJWT, verificarProfessor, async (req, res) =>
     // Trilhas a adicionar (que estão em trilhas_ids mas não em trilhasAtuais)
     const trilhasAdicionar = trilhas_ids.filter(t => !trilhasAtuais.includes(t));
 
-    // Soft delete de inscrições - marca como inativo ao invés de deletar
+    // Remover inscrições (soft delete - deletar registro)
     if (trilhasRemover.length > 0) {
       await pool.query(
-        'UPDATE inscricoes SET ativo = FALSE WHERE aluno_id = $1 AND trilha_id = ANY($2)',
+        'DELETE FROM inscricoes WHERE aluno_id = $1 AND trilha_id = ANY($2)',
         [id, trilhasRemover]
       );
     }

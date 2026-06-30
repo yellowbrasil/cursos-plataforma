@@ -55,7 +55,7 @@ router.put('/', verificarJWT, verificarProfessor, uploadImagem.single('banner'),
     // Atualizar link do Asaas
     if (link_asaas !== undefined) {
       await pool.query(
-        'UPDATE configuracoes SET valor = $1, atualizado_em = NOW() WHERE chave = $2',
+        'UPDATE configuracoes SET valor = $1 WHERE chave = $2',
         [link_asaas, 'link_asaas']
       );
     }
@@ -63,7 +63,7 @@ router.put('/', verificarJWT, verificarProfessor, uploadImagem.single('banner'),
     // Atualizar aviso para alunos
     if (aviso_alunos !== undefined) {
       await pool.query(
-        'UPDATE configuracoes SET valor = $1, atualizado_em = NOW() WHERE chave = $2',
+        'UPDATE configuracoes SET valor = $1 WHERE chave = $2',
         [aviso_alunos, 'aviso_alunos']
       );
     }
@@ -74,7 +74,7 @@ router.put('/', verificarJWT, verificarProfessor, uploadImagem.single('banner'),
       // Arquivo antigo é preservado no disco por segurança
       const banner_url = `/uploads/imagens/${req.file.filename}`;
       await pool.query(
-        'UPDATE configuracoes SET valor = $1, atualizado_em = NOW() WHERE chave = $2',
+        'UPDATE configuracoes SET valor = $1 WHERE chave = $2',
         [banner_url, 'banner_url']
       );
       console.log('Banner atualizado (preservando arquivo antigo):', banner_url);
