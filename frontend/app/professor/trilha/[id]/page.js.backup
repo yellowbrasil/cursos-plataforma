@@ -15,8 +15,6 @@ export default function GerenciarTrilhaPage() {
   const [expandedModulo, setExpandedModulo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
-  const [editandoModulo, setEditandoModulo] = useState(null);
-  const [nomeEditModulo, setNomeEditModulo] = useState('');
   const router = useRouter();
   const params = useParams();
 
@@ -88,27 +86,6 @@ export default function GerenciarTrilhaPage() {
       setShowFormModulo(false);
     } catch (erro) {
       alert('Erro ao criar módulo');
-    }
-  };
-
-  const handleEditarModulo = async (moduloId, novoNome) => {
-    if (!novoNome.trim()) {
-      alert('Nome não pode ser vazio');
-      return;
-    }
-
-    try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/modulos/${moduloId}`,
-        { nome: novoNome },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setModulos(modulos.map(m => m.id === moduloId ? { ...m, nome: novoNome } : m));
-      setEditandoModulo(null);
-      setNomeEditModulo('');
-    } catch (erro) {
-      alert('Erro ao editar módulo');
     }
   };
 
@@ -206,11 +183,6 @@ export default function GerenciarTrilhaPage() {
                 onRefresh={fetchModulos}
                 onReordenar={handleReordenarModulo}
                 onDeletar={handleDeletarModulo}
-                onEditar={handleEditarModulo}
-                editandoModulo={editandoModulo}
-                setEditandoModulo={setEditandoModulo}
-                nomeEditModulo={nomeEditModulo}
-                setNomeEditModulo={setNomeEditModulo}
               />
             ))}
           </div>
@@ -221,19 +193,13 @@ export default function GerenciarTrilhaPage() {
   );
 }
 
-function ModuloCard({
-  modulo, index, totalModulos, licoes, token, onRefresh, onReordenar, onDeletar, onEditar,
-  editandoModulo, setEditandoModulo, nomeEditModulo, setNomeEditModulo
-}) {
+function ModuloCard({ modulo, index, totalModulos, licoes, token, onRefresh, onReordenar, onDeletar }) {
   const [novaLicaoNome, setNovaLicaoNome] = useState('');
   const [novaLicaoVideo, setNovaLicaoVideo] = useState('');
   const [showFormLicao, setShowFormLicao] = useState(false);
   const [showMateriais, setShowMateriais] = useState(null);
   const [materiais, setMateriais] = useState([]);
   const [uploadFile, setUploadFile] = useState(null);
-  const [editandoLicao, setEditandoLicao] = useState(null);
-  const [nomeEditLicao, setNomeEditLicao] = useState('');
-  const [videoEditLicao, setVideoEditLicao] = useState('');
 
   useEffect(() => {
     if (showMateriais !== null) {
@@ -278,28 +244,6 @@ function ModuloCard({
       onRefresh();
     } catch (erro) {
       alert('Erro ao criar lição');
-    }
-  };
-
-  const handleEditarLicao = async (licaoId, novoNome, novoVideo) => {
-    if (!novoNome.trim() || !novoVideo.trim()) {
-      alert('Nome e vídeo não podem ser vazios');
-      return;
-    }
-
-    try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/licoes/${licaoId}`,
-        { nome: novoNome, video_url: novoVideo },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setEditandoLicao(null);
-      setNomeEditLicao('');
-      setVideoEditLicao('');
-      onRefresh();
-    } catch (erro) {
-      alert('Erro ao editar lição');
     }
   };
 
@@ -366,49 +310,10 @@ function ModuloCard({
     <div className="card" style={{ marginBottom: '20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
         <div>
-          {editandoModulo === modulo.id ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <input
-                type="text"
-                value={nomeEditModulo}
-                onChange={(e) => setNomeEditModulo(e.target.value)}
-                style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}
-              />
-              <button
-                onClick={() => onEditar(modulo.id, nomeEditModulo)}
-                className="btn-sm"
-                style={{ backgroundColor: '#51cf66', color: 'white', padding: '6px 12px' }}
-              >
-                Salvar
-              </button>
-              <button
-                onClick={() => setEditandoModulo(null)}
-                className="btn-sm"
-                style={{ backgroundColor: '#868e96', color: 'white', padding: '6px 12px' }}
-              >
-                Cancelar
-              </button>
-            </div>
-          ) : (
-            <>
-              <h3 style={{ color: 'var(--primary)', marginBottom: '5px' }}>{modulo.nome}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{licoes.length} aula(s)</p>
-            </>
-          )}
+          <h3 style={{ color: 'var(--primary)', marginBottom: '5px' }}>{modulo.nome}</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{licoes.length} aula(s)</p>
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
-          {editandoModulo !== modulo.id && (
-            <button
-              onClick={() => {
-                setEditandoModulo(modulo.id);
-                setNomeEditModulo(modulo.nome);
-              }}
-              className="btn-sm"
-              style={{ backgroundColor: '#4dabf7', color: 'white' }}
-            >
-              Editar
-            </button>
-          )}
           <button
             onClick={() => onReordenar(modulo.id, 'cima')}
             disabled={index === 0}
@@ -481,87 +386,36 @@ function ModuloCard({
             <div key={licao.id} style={{ marginBottom: '15px' }}>
               <div className="licao-item">
                 <div className="licao-info">
-                  {editandoLicao === licao.id ? (
-                    <div style={{ display: 'flex', gap: '8px', width: '100%', alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        value={nomeEditLicao}
-                        onChange={(e) => setNomeEditLicao(e.target.value)}
-                        placeholder="Nome da lição"
-                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid var(--border)', flex: 1 }}
-                      />
-                      <input
-                        type="text"
-                        value={videoEditLicao}
-                        onChange={(e) => setVideoEditLicao(e.target.value)}
-                        placeholder="URL do vídeo"
-                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid var(--border)', flex: 1 }}
-                      />
-                    </div>
-                  ) : (
-                    <strong>{licao.nome}</strong>
-                  )}
+                  <strong>{licao.nome}</strong>
                 </div>
                 <div className="licao-buttons">
-                  {editandoLicao === licao.id ? (
-                    <>
-                      <button
-                        onClick={() => handleEditarLicao(licao.id, nomeEditLicao, videoEditLicao)}
-                        className="btn-sm"
-                        style={{ backgroundColor: '#51cf66', color: 'white' }}
-                      >
-                        Salvar
-                      </button>
-                      <button
-                        onClick={() => setEditandoLicao(null)}
-                        className="btn-sm"
-                        style={{ backgroundColor: '#868e96', color: 'white' }}
-                      >
-                        Cancelar
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => {
-                          setEditandoLicao(licao.id);
-                          setNomeEditLicao(licao.nome);
-                          setVideoEditLicao(licao.video_url);
-                        }}
-                        className="btn-sm"
-                        style={{ backgroundColor: '#4dabf7', color: 'white' }}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleReordenarLicao(licao.id, 'cima')}
-                        disabled={licaoIndex === 0}
-                        className="btn-sm"
-                      >
-                        Cima
-                      </button>
-                      <button
-                        onClick={() => handleReordenarLicao(licao.id, 'baixo')}
-                        disabled={licaoIndex === licoes.length - 1}
-                        className="btn-sm"
-                      >
-                        Baixo
-                      </button>
-                      <button
-                        onClick={() => setShowMateriais(showMateriais === licao.id ? null : licao.id)}
-                        className="btn-sm"
-                      >
-                        Arquivos
-                      </button>
-                      <button
-                        onClick={() => handleDeletarLicao(licao.id)}
-                        className="btn-sm"
-                        style={{ backgroundColor: '#ff6b6b', color: 'white' }}
-                      >
-                        Deletar
-                      </button>
-                    </>
-                  )}
+                  <button
+                    onClick={() => handleReordenarLicao(licao.id, 'cima')}
+                    disabled={licaoIndex === 0}
+                    className="btn-sm"
+                  >
+                    Cima
+                  </button>
+                  <button
+                    onClick={() => handleReordenarLicao(licao.id, 'baixo')}
+                    disabled={licaoIndex === licoes.length - 1}
+                    className="btn-sm"
+                  >
+                    Baixo
+                  </button>
+                  <button
+                    onClick={() => setShowMateriais(showMateriais === licao.id ? null : licao.id)}
+                    className="btn-sm"
+                  >
+                    Arquivos
+                  </button>
+                  <button
+                    onClick={() => handleDeletarLicao(licao.id)}
+                    className="btn-sm"
+                    style={{ backgroundColor: '#ff6b6b', color: 'white' }}
+                  >
+                    Deletar
+                  </button>
                 </div>
               </div>
 
