@@ -70,5 +70,29 @@ router.get('/aluno/:aluno_id', verificarJWT, async (req, res) => {
 });
 
 // Deletar inscrição (desinscrever)
+router.delete('/aluno/:aluno_id/trilha/:trilha_id', verificarJWT, async (req, res) => {
+  try {
+    const { aluno_id, trilha_id } = req.params;
+
+    // Verificar permissão (pode ser o próprio aluno ou um professor gerenciando)
+    if (req.usuario_id !== parseInt(aluno_id) && req.tipo_usuario !== 'professor' && req.tipo_usuario !== 'admin') {
+      return res.status(403).json({ erro: 'Acesso negado' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM inscricoes WHERE aluno_id = $1 AND trilha_id = $2 RETURNING *',
+      [aluno_id, trilha_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erro: 'Inscrição não encontrada' });
+    }
+
+    res.json({ mensagem: 'Inscrição removida com sucesso' });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao remover inscrição' });
+  }
+});
 
 export default router;
