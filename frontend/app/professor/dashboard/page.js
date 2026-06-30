@@ -147,7 +147,7 @@ export default function ProfessorDashboardPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="sinopse">Sinópse Breve</label>
+                <label htmlFor="sinopse">Sinopse Breve</label>
                 <textarea
                   id="sinopse"
                   value={sinopse}
