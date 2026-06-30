@@ -2,55 +2,76 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Header from '@/components/Header';
 import axios from 'axios';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import './dashboard.css';
 
 export default function AlunoDashboardPage() {
   const [trilhas, setTrilhas] = useState([]);
+  const [progresso, setProgresso] = useState({});
   const [config, setConfig] = useState({});
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const t = localStorage.getItem('token');
+    if (!t) {
       router.push('/login');
       return;
     }
-
-    const fetchTrilhas = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/com-status/todas`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setTrilhas(response.data);
-      } catch (erro) {
-        console.error('Erro ao buscar trilhas:', erro);
-      }
-    };
-
-    const fetchData = async () => {
-      try {
-        await fetchTrilhas();
-        await fetchConfiguracoes();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    setToken(t);
+    fetchData(t);
   }, [router]);
 
-  const fetchConfiguracoes = async () => {
+  const fetchData = async (t) => {
+    try {
+      await fetchTrilhas(t);
+      await fetchConfiguracoes(t);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTrilhas = async (t) => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/com-status/todas`,
+        { headers: { Authorization: `Bearer ${t}` } }
+      );
+      const minhasTrilhas = response.data.filter(tr => tr.status_inscricao === 'inscrito');
+      setTrilhas(minhasTrilhas);
+
+      // Buscar progresso de cada trilha
+      const progressoMap = {};
+      for (const trilha of minhasTrilhas) {
+        try {
+          const progRes = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/progresso/${trilha.id}`,
+            { headers: { Authorization: `Bearer ${t}` } }
+          );
+          progressoMap[trilha.id] = progRes.data;
+        } catch (erro) {
+          console.error('Erro ao buscar progresso:', erro);
+          progressoMap[trilha.id] = { total: 0, completadas: 0, faltam: 0, percentual: 0 };
+        }
+      }
+      setProgresso(progressoMap);
+    } catch (erro) {
+      console.error('Erro ao buscar trilhas:', erro);
+    }
+  };
+
+  const fetchConfiguracoes = async (t) => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes`,
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       setConfig(response.data);
     } catch (erro) {
-      // Erro silencioso - não é crítico se configurações não carregarem
+      console.error('Erro:', erro);
     }
   };
 
@@ -69,7 +90,6 @@ export default function AlunoDashboardPage() {
     <>
       <Header />
 
-      {/* Banner em tela cheia */}
       {config.banner_url && (
         <div style={{
           width: '100vw',
@@ -79,7 +99,7 @@ export default function AlunoDashboardPage() {
         }}>
           <img
             src={`${process.env.NEXT_PUBLIC_API_URL}/api/configuracoes/banner/download`}
-            alt="Banner Principal AI PRO ACADEMY"
+            alt="Banner"
             style={{
               width: '100%',
               height: 'auto',
@@ -90,9 +110,7 @@ export default function AlunoDashboardPage() {
         </div>
       )}
 
-      <div className="container" style={{ marginTop: '40px' }}>
-
-
+      <div className="container" style={{ marginTop: '40px', marginBottom: '60px' }}>
         {config.aviso_alunos && (
           <div style={{
             backgroundColor: 'var(--primary)',
@@ -108,144 +126,132 @@ export default function AlunoDashboardPage() {
           </div>
         )}
 
-        <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+          <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Minhas Trilhas de Aprendizado</h1>
+          <button
+            onClick={() => router.push('/aluno/explorar')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: 'var(--primary)',
+              color: '#000',
+              border: 'none',
+              borderRadius: '4px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            ➕ Explorar Trilhas
+          </button>
+        </div>
 
         {trilhas.length === 0 ? (
           <p style={{ marginTop: '20px', color: '#ccc' }}>
-            Você não está inscrito em nenhuma trilha ainda. Contacte um professor!
+            Você não está inscrito em nenhuma trilha ainda.{' '}
+            <button
+              onClick={() => router.push('/aluno/explorar')}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Explore trilhas disponíveis →
+            </button>
           </p>
         ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '20px',
-              marginTop: '30px',
-            }}
-          >
-            {trilhas.map((trilha) => (
-              <div key={trilha.id}>
-                {trilha.status_inscricao === 'inscrito' ? (
-                  <Link href={`/aluno/trilha/${trilha.id}`}>
-                    <div className="card" style={{ cursor: 'pointer', transition: 'all 0.3s' }}>
-                      {trilha.id && (
-                        <img
-                          src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
-                          alt={trilha.nome}
-                          style={{
-                            width: '100%',
-                            height: '165px',
-                            objectFit: 'cover',
-                            borderRadius: '4px',
-                            marginBottom: '15px',
-                          }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      )}
-                      <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
-                        {trilha.nome}
-                      </h3>
-                      {trilha.sinopse && (
-                        <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '10px', fontStyle: 'italic' }}>
-                          {trilha.sinopse}
-                        </p>
-                      )}
-                      <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '12px' }}>
-                        {trilha.descricao}
-                      </p>
-                      <div
-                        style={{
-                          backgroundColor: '#51cf66',
-                          color: '#000',
-                          padding: '8px 12px',
-                          borderRadius: '4px',
-                          fontWeight: 600,
-                          fontSize: '13px',
-                          textAlign: 'center',
-                        }}
-                      >
-                        Acesso Liberado
-                      </div>
-                    </div>
-                  </Link>
-                ) : (
-                  <div className="card">
-                    {trilha.id && (
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
-                        alt={trilha.nome}
-                        style={{
-                          width: '100%',
-                          height: '165px',
-                          objectFit: 'cover',
-                          borderRadius: '4px',
-                          marginBottom: '15px',
-                          opacity: 0.6,
-                        }}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '20px',
+            marginTop: '30px'
+          }}>
+            {trilhas.map((trilha) => {
+              const prog = progresso[trilha.id] || { total: 0, completadas: 0, faltam: 0, percentual: 0 };
+              return (
+                <div
+                  key={trilha.id}
+                  onClick={() => router.push(`/aluno/trilha/${trilha.id}`)}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  {trilha.imagem_url && (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
+                      alt={trilha.nome}
+                      style={{
+                        width: '100%',
+                        height: '180px',
+                        objectFit: 'cover',
+                      }}
+                      onError={(e) => e.target.style.display = 'none'}
+                    />
+                  )}
+
+                  <div style={{ padding: '20px' }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '8px', color: 'var(--primary)' }}>
                       {trilha.nome}
                     </h3>
+
                     {trilha.sinopse && (
-                      <p style={{ color: 'var(--text-muted)', marginBottom: '15px', fontSize: '13px' }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '15px' }}>
                         {trilha.sinopse}
                       </p>
                     )}
-                    {trilha.link_asaas ? (
-                      <a
-                        href={trilha.link_asaas}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'block',
-                          backgroundColor: 'var(--primary)',
-                          color: 'var(--bg-dark)',
-                          padding: '8px 12px',
-                          borderRadius: '4px',
-                          fontWeight: 600,
-                          fontSize: '13px',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          textDecoration: 'none',
-                          transition: 'background-color 0.3s',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#ff7722';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'var(--primary)';
-                        }}
-                      >
-                        Comprar Acesso
-                      </a>
-                    ) : (
-                      <div
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: '4px',
-                          fontWeight: 600,
-                          fontSize: '13px',
-                          textAlign: 'center',
-                          backgroundColor: '#444',
-                          color: '#999',
-                        }}
-                      >
-                        Indisponível
+
+                    {/* Progresso */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Progresso</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                          {prog.completadas}/{prog.total} lições
+                        </span>
                       </div>
-                    )}
+                      <div style={{
+                        width: '100%',
+                        height: '8px',
+                        backgroundColor: 'var(--bg-dark)',
+                        borderRadius: '4px',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${prog.percentual}%`,
+                          backgroundColor: prog.percentual === 100 ? '#51cf66' : 'var(--primary)',
+                          transition: 'width 0.3s'
+                        }} />
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', textAlign: 'right' }}>
+                        {prog.percentual}% · {prog.faltam} faltando
+                      </div>
+                    </div>
+
+                    <button
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: prog.percentual === 100 ? '#51cf66' : 'var(--primary)',
+                        color: prog.percentual === 100 ? '#000' : '#000',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '13px'
+                      }}
+                    >
+                      {prog.percentual === 100 ? '✅ Concluído' : 'Continuar'}
+                    </button>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
+      <Footer />
     </>
   );
 }

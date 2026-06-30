@@ -150,3 +150,44 @@ router.get('/trilha/:trilha_id', verificarJWT, verificarProfessor, async (req, r
 // Remover inscrição
 
 export default router;
+
+// Obter progresso do aluno em uma trilha
+router.get('/progresso/:trilha_id', verificarJWT, async (req, res) => {
+  try {
+    const { trilha_id } = req.params;
+    const aluno_id = req.usuario_id;
+
+    // Total de lições na trilha
+    const totalResult = await pool.query(
+      `SELECT COUNT(*) as total FROM licoes l
+       INNER JOIN modulos m ON l.modulo_id = m.id
+       WHERE m.trilha_id = $1 AND l.ativo = TRUE AND l.deletado_pelo_usuario = FALSE`,
+      [trilha_id]
+    );
+
+    const total = parseInt(totalResult.rows[0].total);
+
+    // Lições completadas pelo aluno
+    const completadasResult = await pool.query(
+      `SELECT COUNT(DISTINCT lc.licao_id) as completadas FROM licoes_completadas lc
+       INNER JOIN licoes l ON lc.licao_id = l.id
+       INNER JOIN modulos m ON l.modulo_id = m.id
+       WHERE m.trilha_id = $1 AND lc.aluno_id = $2 AND l.ativo = TRUE`,
+      [trilha_id, aluno_id]
+    );
+
+    const completadas = parseInt(completadasResult.rows[0].completadas);
+    const percentual = total > 0 ? Math.round((completadas / total) * 100) : 0;
+
+    res.json({
+      trilha_id,
+      total,
+      completadas,
+      faltam: total - completadas,
+      percentual
+    });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ erro: 'Erro ao calcular progresso' });
+  }
+});

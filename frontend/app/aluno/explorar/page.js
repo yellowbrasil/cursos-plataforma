@@ -2,65 +2,46 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
 import axios from 'axios';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export default function ExplorarPage() {
-  const [todasTrilhas, setTodasTrilhas] = useState([]);
-  const [trilhasInscritas, setTrilhasInscritas] = useState([]);
+  const [trilhas, setTrilhas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [inscrevendo, setInscrevendo] = useState(null);
   const [token, setToken] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     const t = localStorage.getItem('token');
-    const usuario = localStorage.getItem('usuario');
     if (!t) {
       router.push('/login');
       return;
     }
     setToken(t);
-
-    const fetch = async () => {
-      try {
-        // Buscar todas as trilhas (admin only, vamos usar uma query simples)
-        const [listarRes, minhasRes] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas`, {
-            headers: { Authorization: `Bearer ${t}` },
-          }),
-          usuario ? axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/inscricoes/aluno/${JSON.parse(usuario).id}`, {
-            headers: { Authorization: `Bearer ${t}` },
-          }).catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
-        ]);
-
-        setTodasTrilhas(listarRes.data);
-        setTrilhasInscritas(minhasRes.data.map((i) => i.trilha_id));
-      } catch (erro) {
-        console.error('Erro:', erro);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetch();
+    fetchTrilhas(t);
   }, [router]);
 
-  const handleInscrever = async (trilhaId) => {
-    setInscrevendo(trilhaId);
+  const fetchTrilhas = async (t) => {
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/inscricoes`,
-        { trilha_id: trilhaId },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/com-status/todas`,
+        { headers: { Authorization: `Bearer ${t}` } }
       );
-
-      setTrilhasInscritas([...trilhasInscritas, trilhaId]);
-      alert('Inscrito com sucesso!');
+      // Filtrar apenas trilhas não inscritas
+      setTrilhas(response.data.filter(t => t.status_inscricao === 'nao_inscrito'));
     } catch (erro) {
-      alert(erro.response?.data?.erro || 'Erro ao inscrever');
+      console.error('Erro:', erro);
     } finally {
-      setInscrevendo(null);
+      setLoading(false);
+    }
+  };
+
+  const handleComprar = (trilha) => {
+    if (trilha.link_asaas) {
+      window.open(trilha.link_asaas, '_blank');
+    } else {
+      alert('Trilha sem link de compra configurado. Contacte um professor!');
     }
   };
 
@@ -75,55 +56,84 @@ export default function ExplorarPage() {
     );
   }
 
-  const trilhasDisponiveis = todasTrilhas.filter((t) => !trilhasInscritas.includes(t.id));
-
   return (
     <>
       <Header />
-      <div className="container" style={{ marginTop: '40px' }}>
+      <div className="container" style={{ marginTop: '40px', marginBottom: '60px' }}>
         <h1><span className="pulse" style={{ marginRight: '12px' }}></span>Explorar Trilhas</h1>
 
-        {trilhasDisponiveis.length === 0 ? (
-          <div style={{ marginTop: '30px', color: 'var(--text-muted)' }}>
-            <p>Você já está inscrito em todas as trilhas disponíveis!</p>
-            <button
-              onClick={() => router.push('/aluno/dashboard')}
-              className="btn-primary"
-              style={{ marginTop: '20px' }}
-            >
-              Ver Minhas Trilhas
-            </button>
-          </div>
+        {trilhas.length === 0 ? (
+          <p style={{ marginTop: '20px', color: '#ccc' }}>
+            Você já está inscrito em todas as trilhas disponíveis! 🎉
+          </p>
         ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '20px',
-              marginTop: '30px',
-            }}
-          >
-            {trilhasDisponiveis.map((trilha) => (
-              <div key={trilha.id} className="card">
-                <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>
-                  {trilha.nome}
-                </h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
-                  {trilha.descricao}
-                </p>
-                <button
-                  onClick={() => handleInscrever(trilha.id)}
-                  disabled={inscrevendo === trilha.id}
-                  className="btn-primary"
-                  style={{ width: '100%' }}
-                >
-                  {inscrevendo === trilha.id ? 'Inscrevendo...' : 'Se Inscrever'}
-                </button>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '20px',
+            marginTop: '30px'
+          }}>
+            {trilhas.map((trilha) => (
+              <div
+                key={trilha.id}
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  transition: 'transform 0.3s',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                {trilha.imagem_url && (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/api/trilhas/${trilha.id}/imagem`}
+                    alt={trilha.nome}
+                    style={{
+                      width: '100%',
+                      height: '180px',
+                      objectFit: 'cover',
+                    }}
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                )}
+
+                <div style={{ padding: '20px' }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '10px', color: 'var(--primary)' }}>
+                    {trilha.nome}
+                  </h3>
+
+                  {trilha.sinopse && (
+                    <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '15px' }}>
+                      {trilha.sinopse}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={() => handleComprar(trilha)}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      backgroundColor: 'var(--primary)',
+                      color: '#000',
+                      border: 'none',
+                      borderRadius: '4px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    💳 Adquirir Acesso
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+      <Footer />
     </>
   );
 }
