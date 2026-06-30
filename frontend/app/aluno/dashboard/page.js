@@ -25,28 +25,21 @@ export default function AlunoDashboardPage() {
       return;
     }
 
-    // Tentar extrair userId do localStorage
     let userId = null;
     const u = JSON.parse(localStorage.getItem('usuario') || '{}');
     userId = u.id;
 
-    // Fallback: extrair do JWT se localStorage falhar
     if (!userId && t) {
       try {
         const payload = JSON.parse(atob(t.split('.')[1]));
         userId = payload.id;
-        console.log('[DEBUG] UserId extraído do JWT:', userId);
       } catch (e) {
-        console.error('[DEBUG] Erro ao decodificar JWT:', e);
+        console.error('Erro ao decodificar JWT:', e);
       }
     }
 
-    if (!userId) {
-      console.error('[DEBUG] Erro: userId não encontrado');
-      return;
-    }
+    if (!userId) return;
 
-    console.log('[DEBUG] UserId obtido:', userId);
     setToken(t);
     fetchData(t, userId);
   }, [router]);
@@ -103,43 +96,24 @@ export default function AlunoDashboardPage() {
   };
 
   const fetchStatusAcesso = async (t, userId) => {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`;
-
-    console.log('[DEBUG-FETCH] Iniciando fetchStatusAcesso');
-    console.log('[DEBUG-FETCH] URL:', url);
-    console.log('[DEBUG-FETCH] UserId:', userId);
-    console.log('[DEBUG-FETCH] Token:', t ? 'SIM' : 'NÃO');
+    if (!t || !userId) return;
 
     try {
-      console.log('[DEBUG-FETCH] Fazendo requisição axios...');
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${t}` }
-      });
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`,
+        { headers: { Authorization: `Bearer ${t}` } }
+      );
 
-      console.log('[DEBUG-FETCH] Resposta recebida:', response.status);
-      console.log('[DEBUG-FETCH] Dados:', response.data);
-
-      if (!response.data || !Array.isArray(response.data)) {
-        console.warn('[DEBUG-FETCH] Resposta inválida - não é array:', response.data);
-        return;
-      }
-
-      console.log(`[DEBUG-FETCH] Array com ${response.data.length} itens`);
+      if (!response.data || !Array.isArray(response.data)) return;
 
       const statusMap = {};
-      response.data.forEach((item, idx) => {
+      response.data.forEach(item => {
         statusMap[item.trilha_id] = item;
-        console.log(`[DEBUG-FETCH] [${idx}] Trilha ${item.trilha_id}: ${item.status_acesso} (${item.dias_faltando} dias)`);
       });
 
-      console.log('[DEBUG-FETCH] StatusMap completo:', statusMap);
       setStatusAcesso(statusMap);
-      console.log('[DEBUG-FETCH] ✅ setStatusAcesso chamado com sucesso');
     } catch (erro) {
-      console.error('[DEBUG-FETCH] ❌ ERRO NA REQUISIÇÃO:', erro.message);
-      console.error('[DEBUG-FETCH] Status:', erro.response?.status);
-      console.error('[DEBUG-FETCH] Data:', erro.response?.data);
-      console.error('[DEBUG-FETCH] Stack:', erro.stack);
+      console.error('Erro ao buscar status de acesso:', erro.message);
     }
   };
 
