@@ -103,28 +103,43 @@ export default function AlunoDashboardPage() {
   };
 
   const fetchStatusAcesso = async (t, userId) => {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`;
+
+    console.log('[DEBUG-FETCH] Iniciando fetchStatusAcesso');
+    console.log('[DEBUG-FETCH] URL:', url);
+    console.log('[DEBUG-FETCH] UserId:', userId);
+    console.log('[DEBUG-FETCH] Token:', t ? 'SIM' : 'NÃO');
+
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`,
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
+      console.log('[DEBUG-FETCH] Fazendo requisição axios...');
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${t}` }
+      });
+
+      console.log('[DEBUG-FETCH] Resposta recebida:', response.status);
+      console.log('[DEBUG-FETCH] Dados:', response.data);
 
       if (!response.data || !Array.isArray(response.data)) {
-        console.warn('Resposta inválida da API de acesso:', response.data);
+        console.warn('[DEBUG-FETCH] Resposta inválida - não é array:', response.data);
         return;
       }
 
+      console.log(`[DEBUG-FETCH] Array com ${response.data.length} itens`);
+
       const statusMap = {};
-      response.data.forEach(item => {
+      response.data.forEach((item, idx) => {
         statusMap[item.trilha_id] = item;
-        console.log(`[DEBUG] Status carregado - Trilha ${item.trilha_id}: ${item.status_acesso} (${item.dias_faltando} dias)`);
+        console.log(`[DEBUG-FETCH] [${idx}] Trilha ${item.trilha_id}: ${item.status_acesso} (${item.dias_faltando} dias)`);
       });
 
-      console.log('[DEBUG] StatusMap completo:', statusMap);
+      console.log('[DEBUG-FETCH] StatusMap completo:', statusMap);
       setStatusAcesso(statusMap);
+      console.log('[DEBUG-FETCH] ✅ setStatusAcesso chamado com sucesso');
     } catch (erro) {
-      console.error('Erro ao buscar status de acesso:', erro);
-      console.error('Detalhes:', erro.response?.data || erro.message);
+      console.error('[DEBUG-FETCH] ❌ ERRO NA REQUISIÇÃO:', erro.message);
+      console.error('[DEBUG-FETCH] Status:', erro.response?.status);
+      console.error('[DEBUG-FETCH] Data:', erro.response?.data);
+      console.error('[DEBUG-FETCH] Stack:', erro.stack);
     }
   };
 
