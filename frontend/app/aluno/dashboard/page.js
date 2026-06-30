@@ -159,7 +159,7 @@ export default function AlunoDashboardPage() {
               transition: 'all 0.3s'
             }}
           >
-            📚 Meus Cursos ({minhasTrilhas.length})
+            ● Meus Cursos ({minhasTrilhas.length})
           </button>
 
           <button
@@ -175,7 +175,7 @@ export default function AlunoDashboardPage() {
               transition: 'all 0.3s'
             }}
           >
-            ⭐ Novidades ({novasTrilhas.length})
+            ● Novidades ({novasTrilhas.length})
           </button>
 
           <button
@@ -191,7 +191,7 @@ export default function AlunoDashboardPage() {
               transition: 'all 0.3s'
             }}
           >
-            🔍 Explorar Tudo ({todasTrilhas.length})
+            ● Explorar Tudo ({todasTrilhas.length})
           </button>
         </div>
 
@@ -199,7 +199,7 @@ export default function AlunoDashboardPage() {
         {trilhasParaMostrar.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
             <p style={{ color: 'var(--text-muted)', fontSize: '18px', marginBottom: '20px' }}>
-              {abaAtiva === 'minhas' && 'Você ainda não tem nenhum curso. 🎓'}
+              {abaAtiva === 'minhas' && 'Você ainda não tem nenhum curso.'}
               {abaAtiva === 'novo' && 'Nenhum curso novo no momento.'}
               {abaAtiva === 'todos' && 'Nenhum curso disponível.'}
             </p>
@@ -263,7 +263,7 @@ export default function AlunoDashboardPage() {
                       fontWeight: '700',
                       zIndex: 10
                     }}>
-                      ✅ CONCLUÍDO
+                      ● CONCLUÍDO
                     </div>
                   )}
 
@@ -280,7 +280,7 @@ export default function AlunoDashboardPage() {
                       fontWeight: '700',
                       zIndex: 10
                     }}>
-                      🆕 NOVO
+                      ● NOVO
                     </div>
                   )}
 
@@ -366,7 +366,7 @@ export default function AlunoDashboardPage() {
                         if (!isComprada) e.target.style.backgroundColor = '#4c6ef5';
                       }}
                     >
-                      {isComprada ? (prog.percentual === 100 ? '✅ Concluído' : '▶ Continuar') : '💳 Adquirir'}
+                      {isComprada ? (prog.percentual === 100 ? '● Concluído' : '● Continuar') : '● Adquirir'}
                     </button>
                   </div>
                 </div>
