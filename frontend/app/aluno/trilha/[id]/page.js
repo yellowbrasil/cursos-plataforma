@@ -39,6 +39,8 @@ export default function TrilhaPage() {
   const [materiais, setMateriais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [statusAcesso, setStatusAcesso] = useState(null);
+  const [userId, setUserId] = useState(null);
   const router = useRouter();
   const params = useParams();
 
@@ -49,6 +51,14 @@ export default function TrilhaPage() {
       return;
     }
     setToken(t);
+
+    // Extrair userId do JWT (simplificado)
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1]));
+      setUserId(payload.id);
+    } catch (e) {
+      console.error('Erro ao decodificar JWT:', e);
+    }
 
     const fetchTrilha = async () => {
       try {
@@ -78,6 +88,29 @@ export default function TrilhaPage() {
 
     fetchTrilha();
   }, [router, params.id]);
+
+  useEffect(() => {
+    if (!token || !userId) return;
+
+    const fetchStatusAcesso = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/aluno/${userId}/status`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // Encontrar status para a trilha atual
+        const trilhaStatus = res.data.find(s => s.trilha_id === parseInt(params.id));
+        if (trilhaStatus) {
+          setStatusAcesso(trilhaStatus);
+        }
+      } catch (erro) {
+        console.error('Erro ao buscar status de acesso:', erro);
+      }
+    };
+
+    fetchStatusAcesso();
+  }, [token, userId, params.id]);
 
   const handleLicaoClique = async (licao) => {
     setLicaoSelecionada(licao);
@@ -116,9 +149,35 @@ export default function TrilhaPage() {
     );
   }
 
+  // Determinar se deve mostrar aviso crítico (≤5 dias)
+  const mostrarAvisoCritico = statusAcesso &&
+    (statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 5) ||
+    statusAcesso.status_acesso === 'expirado' ||
+    statusAcesso.status_acesso === 'bloqueado_manualmente';
+
   return (
     <>
       <Header />
+      {mostrarAvisoCritico && statusAcesso && (
+        <div style={{
+          background: '#ff6b6b',
+          color: '#fff',
+          padding: '15px 20px',
+          textAlign: 'center',
+          fontWeight: '600',
+          fontSize: '14px'
+        }}>
+          {statusAcesso.status_acesso === 'expirado' && (
+            '⚠️ Seu acesso a esta trilha expirou'
+          )}
+          {statusAcesso.status_acesso === 'bloqueado_manualmente' && (
+            '⚠️ Seu acesso a esta trilha foi bloqueado'
+          )}
+          {statusAcesso.status_acesso === 'expirando_em_breve' && statusAcesso.dias_faltando <= 5 && (
+            `⚠️ URGENTE: Seu acesso expira em ${statusAcesso.dias_faltando} ${statusAcesso.dias_faltando === 1 ? 'dia' : 'dias'}`
+          )}
+        </div>
+      )}
       <div className="trilha-container">
         <div className="trilha-content">
           {licaoSelecionada ? (
@@ -207,6 +266,39 @@ export default function TrilhaPage() {
 
         {licaoSelecionada && (
           <aside className="licoes-sidebar">
+            {statusAcesso && (
+              <div style={{
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                  ⏰ Seu Acesso
+                </div>
+                {statusAcesso.status_acesso === 'ativo' && (
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#51cf66' }}>
+                    ✓ Ativo ({statusAcesso.dias_faltando} dias)
+                  </div>
+                )}
+                {statusAcesso.status_acesso === 'expirando_em_breve' && (
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff922b' }}>
+                    ⚠️ Expira em {statusAcesso.dias_faltando} dias
+                  </div>
+                )}
+                {statusAcesso.status_acesso === 'expirado' && (
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
+                    ✗ Acesso Expirado
+                  </div>
+                )}
+                {statusAcesso.status_acesso === 'bloqueado_manualmente' && (
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#ff6b6b' }}>
+                    🔒 Acesso Bloqueado
+                  </div>
+                )}
+              </div>
+            )}
             <h3>Aulas do Módulo</h3>
             <PlaylistLicoes
               modulos={modulos}
