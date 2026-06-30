@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import './dashboard.css';
 
 export default function AlunoDashboardPage() {
   const [trilhas, setTrilhas] = useState([]);
