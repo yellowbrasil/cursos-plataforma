@@ -18,6 +18,7 @@ export default function AlunosPage() {
   const [alunoEditando, setAlunoEditando] = useState(null);
   const [trilhasAluno, setTrilhasAluno] = useState([]);
   const [trilhasOriginais, setTrilhasOriginais] = useState([]);
+  const [duracoesAcesso, setDuracoesAcesso] = useState({});
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -147,12 +148,13 @@ export default function AlunosPage() {
         }
       }
 
-      // Adicionar inscrições
+      // Adicionar inscrições COM DURAÇÃO
       for (const trilhaId of aAdicionar) {
         try {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/alunos/inscrever`,
-            { aluno_id: alunoEditando.id, trilha_id: trilhaId },
+          const duracao = duracoesAcesso[trilhaId] || 30;
+          await axios.put(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/acesso/inscrever/${alunoEditando.id}/trilha/${trilhaId}`,
+            { duracao_dias: parseInt(duracao) },
             { headers: { Authorization: `Bearer ${token}` } }
           );
         } catch (erro) {
@@ -167,6 +169,7 @@ export default function AlunosPage() {
       setAlunoEditando(null);
       setTrilhasAluno([]);
       setTrilhasOriginais([]);
+      setDuracoesAcesso({});
       fetchAlunos(token, busca);
     } catch (erro) {
       alert('Erro ao atualizar trilhas');
@@ -379,26 +382,58 @@ export default function AlunosPage() {
                   <p style={{ color: 'var(--text-muted)' }}>Nenhuma trilha disponível.</p>
                 ) : (
                   trilhas.map((trilha) => (
-                    <div key={trilha.id} style={{ marginBottom: '12px', display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="checkbox"
-                        id={`trilha-${trilha.id}`}
-                        checked={trilhasAluno.includes(trilha.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setTrilhasAluno([...trilhasAluno, trilha.id]);
-                          } else {
-                            setTrilhasAluno(trilhasAluno.filter(id => id !== trilha.id));
-                          }
-                        }}
-                        style={{ marginRight: '8px', cursor: 'pointer', width: '18px', height: '18px' }}
-                      />
-                      <label
-                        htmlFor={`trilha-${trilha.id}`}
-                        style={{ cursor: 'pointer', flex: 1, marginBottom: 0 }}
-                      >
-                        {trilha.nome}
-                      </label>
+                    <div key={trilha.id} style={{ marginBottom: '16px', padding: '12px', backgroundColor: 'var(--bg-dark)', borderRadius: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                        <input
+                          type="checkbox"
+                          id={`trilha-${trilha.id}`}
+                          checked={trilhasAluno.includes(trilha.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setTrilhasAluno([...trilhasAluno, trilha.id]);
+                              if (!duracoesAcesso[trilha.id]) {
+                                setDuracoesAcesso({ ...duracoesAcesso, [trilha.id]: 30 });
+                              }
+                            } else {
+                              setTrilhasAluno(trilhasAluno.filter(id => id !== trilha.id));
+                            }
+                          }}
+                          style={{ marginRight: '8px', cursor: 'pointer', width: '18px', height: '18px' }}
+                        />
+                        <label
+                          htmlFor={`trilha-${trilha.id}`}
+                          style={{ cursor: 'pointer', flex: 1, marginBottom: 0 }}
+                        >
+                          {trilha.nome}
+                        </label>
+                      </div>
+
+                      {trilhasAluno.includes(trilha.id) && (
+                        <div style={{ marginLeft: '26px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                            Duração de acesso:
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="365"
+                            value={duracoesAcesso[trilha.id] || 30}
+                            onChange={(e) => {
+                              setDuracoesAcesso({ ...duracoesAcesso, [trilha.id]: e.target.value });
+                            }}
+                            style={{
+                              width: '60px',
+                              padding: '6px',
+                              border: '1px solid var(--border)',
+                              borderRadius: '4px',
+                              backgroundColor: 'var(--bg-card)',
+                              color: 'var(--text)',
+                              fontSize: '13px'
+                            }}
+                          />
+                          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>dias</span>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
@@ -411,6 +446,7 @@ export default function AlunosPage() {
                     setAlunoEditando(null);
                     setTrilhasAluno([]);
                     setTrilhasOriginais([]);
+                    setDuracoesAcesso({});
                   }}
                   style={{
                     padding: '10px 20px',
